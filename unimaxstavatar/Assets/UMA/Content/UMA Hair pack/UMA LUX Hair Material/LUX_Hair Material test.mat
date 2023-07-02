@@ -1,0 +1,146 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-4469087847218404483
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 1
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: LUX_Hair Material test
+  m_Shader: {fileID: 4800000, guid: 6ea049e9f2f0d4ec693322ebc817af04, type: 3}
+  m_ShaderKeywords: _MASKMAP _NORMALMAP _SECONDARYLOBE _STRANDDIR_BITANGENT
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 1
+  m_CustomRenderQueue: 2450
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 6c8fa7b5c3ecf1f4f83a1129f2c19cc3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 2800000, guid: 6cd24f1e0f00c3242a7b7af3b8a1d3b5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 6c8fa7b5c3ecf1f4f83a1129f2c19cc3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MaskMap:
+        m_Texture: {fileID: 2800000, guid: 30821a63baac3704dac90139db96ab79, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ProbeVolumeOcc:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ProbeVolumeShB:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ProbeVolumeShG:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ProbeVolumeShR:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AlphaClip: 0
+    - _AmbientReflection: 0.048
+    - _ApplyNormal: 1
+    - _Bitmask: 0
+    - _Blend: 0
+    - _BumpScale: 0.5
+    - _Coverage: 0
+    - _Cull: 0
+    - _Culling: 0
+    - _Cutoff: 0.293
+    - _DstBlend: 0
+    - _EnableMaskMap: 1
+    - _EnableVFACE: 0
+    - _EnvironmentReflections: 1
+    - _GlossMapScale: 0
+    - _Glossiness: 0
+    - _GlossyReflections: 0
+    - _Metallic: 0
+    - _OcclusionStrength: 1
+    - _PROBEVOLUME: 0
+    - _QueueOffset: 0
+    - _ReadMask: 255
+    - _ReceiveShadows: 1
+    - _Rim: 0
+    - _RimFrequency: 5
+    - _RimMinPower: 7
+    - _RimPerPositionFrequency: 0.494
+    - _RimPower: 8
+    - _RimTransmissionIntensity: 2.29
+    - _SecondaryLobe: 1
+    - _SecondarySpecularExponent: 0.723
+    - _SecondarySpecularShift: 0.859
+    - _ShadowCull: 0
+    - _Shadows: 0
+    - _Smoothness: 0.839
+    - _SmoothnessTextureChannel: 0
+    - _SpecularExponent: 0.193
+    - _SpecularHighlights: 1
+    - _SpecularShift: -0.591
+    - _SrcBlend: 1
+    - _Stencil: 87
+    - _StencilComp: 8
+    - _StencilFail: 0
+    - _StencilOp: 0
+    - _StencilZFail: 0
+    - _StrandDir: 0
+    - _Surface: 0
+    - _WorkflowMode: 1
+    - _WriteMask: 255
+    - _ZTest: 5
+    - _ZWrite: 1
+    m_Colors:
+    - _BaseColor: {r: 0.45283014, g: 0.45283014, b: 0.45283014, a: 1}
+    - _Color: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _ProbeVolumeMin: {r: 0, g: 0, b: 0, a: 0}
+    - _ProbeVolumeSizeInv: {r: 0, g: 0, b: 0, a: 0}
+    - _RimColor: {r: 0.6698113, g: 0.6698113, b: 0.6698113, a: 1}
+    - _SecondaryColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SecondarySpecularTint: {r: 0.3679245, g: 0.26574278, b: 0.24123353, a: 1}
+    - _SpecColor: {r: 0.3962264, g: 0.3962264, b: 0.3962264, a: 1}
+    - _SpecularTint: {r: 0.3207547, g: 0.25556505, b: 0.24359201, a: 1}
+  m_BuildTextureStacks: []
