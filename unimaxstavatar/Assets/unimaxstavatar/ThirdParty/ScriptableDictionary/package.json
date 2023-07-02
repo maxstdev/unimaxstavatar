@@ -1,0 +1,12 @@
+{
+    "name": "net.abrusle.unity-scriptable.dictionary",
+    "version": "0.0.1",
+    "displayName": "Scriptable Dictionary",
+    "description": "Dictionaries as ScriptableObjects",
+    "unity": "2019.1",
+    "author": {
+        "name": "Abrusle",
+        "email": "public.abrusle@email.com",
+        "url": "https://github.com/abrusle/unity-scriptable-dictionary"
+    }
+}

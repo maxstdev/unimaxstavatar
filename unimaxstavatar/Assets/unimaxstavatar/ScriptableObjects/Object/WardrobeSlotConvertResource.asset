@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7112856750c55a443b525be875247fb3, type: 3}
+  m_Name: WardrobeSlotConvertResource
+  m_EditorClassIdentifier: 
+  convertData:
+    keys: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f00000010000000
+    values:
+    - koreanName: 0
+      defaultIcon: {fileID: 0}
+      selectIcon: {fileID: 0}
+    - koreanName: 1
+      defaultIcon: {fileID: 21300000, guid: a934eae9db0620d45b1511afaeab9cf4, type: 3}
+      selectIcon: {fileID: 21300000, guid: fb5e21204dbbe5945a07b97b64dc89e1, type: 3}
+    - koreanName: 2
+      defaultIcon: {fileID: 0}
+      selectIcon: {fileID: 0}
+    - koreanName: 3
+      defaultIcon: {fileID: 21300000, guid: 788768692ba5f4d4baa345fb023fafa6, type: 3}
+      selectIcon: {fileID: 21300000, guid: 9bfac56e3029852498ee83b33269a42b, type: 3}
+    - koreanName: 0
+      defaultIcon: {fileID: 0}
+      selectIcon: {fileID: 0}
+    - koreanName: 5
+      defaultIcon: {fileID: 21300000, guid: a934eae9db0620d45b1511afaeab9cf4, type: 3}
+      selectIcon: {fileID: 21300000, guid: fb5e21204dbbe5945a07b97b64dc89e1, type: 3}
+    - koreanName: 0
+      defaultIcon: {fileID: 0}
+      selectIcon: {fileID: 0}
+    - koreanName: 0
+      defaultIcon: {fileID: 0}
+      selectIcon: {fileID: 0}
+    - koreanName: 0
+      defaultIcon: {fileID: 0}
+      selectIcon: {fileID: 0}
+    - koreanName: 0
+      defaultIcon: {fileID: 0}
+      selectIcon: {fileID: 0}
+    - koreanName: 10
+      defaultIcon: {fileID: 21300000, guid: 3f0fe4d7eebe1cc48b3d064384e676bb, type: 3}
+      selectIcon: {fileID: 21300000, guid: 44e1c45609c12794d836ac08b23e16de, type: 3}
+    - koreanName: 0
+      defaultIcon: {fileID: 0}
+      selectIcon: {fileID: 0}
+    - koreanName: 0
+      defaultIcon: {fileID: 0}
+      selectIcon: {fileID: 0}
+    - koreanName: 0
+      defaultIcon: {fileID: 0}
+      selectIcon: {fileID: 0}
+    - koreanName: 14
+      defaultIcon: {fileID: 21300000, guid: 555c35fb3c44b9c40852b0b093355a46, type: 3}
+      selectIcon: {fileID: 21300000, guid: 37d1fe9a757887f4fac71b11cd544a88, type: 3}
+    - koreanName: 15
+      defaultIcon: {fileID: 21300000, guid: 3e4d6d193c275cd4dadba907df45f77a, type: 3}
+      selectIcon: {fileID: 21300000, guid: d5f6359b239263c46aa82058d75f6d13, type: 3}
+    - koreanName: 16
+      defaultIcon: {fileID: 21300000, guid: 018f66df296188445b502dede18ca1f3, type: 3}
+      selectIcon: {fileID: 21300000, guid: 1746a6ede7778854cbb80f43944a0487, type: 3}
+  viewType:
+    keys: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f00000010000000
+    values: 0000000000000000000000000100000000000000000000000000000000000000000000000000000003000000000000000000000000000000030000000300000000000000

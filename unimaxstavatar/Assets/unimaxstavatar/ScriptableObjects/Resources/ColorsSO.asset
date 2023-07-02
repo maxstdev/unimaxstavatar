@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 954bd2ec6fb1c084abccce1213de8322, type: 3}
+  m_Name: ColorsSO
+  m_EditorClassIdentifier: 
+  Primary:
+    serializedVersion: 2
+    rgba: 4294660447
+  Black:
+    serializedVersion: 2
+    rgba: 4280886561
+  Gray900:
+    serializedVersion: 2
+    rgba: 4282793015
+  Gray800:
+    serializedVersion: 2
+    rgba: 4284766800
+  Gray700:
+    serializedVersion: 2
+    rgba: 4287925380
+  Gray200:
+    serializedVersion: 2
+    rgba: 4292005320
+  Gray100:
+    serializedVersion: 2
+    rgba: 4293321180
+  Gray50:
+    serializedVersion: 2
+    rgba: 4293913833
+  White:
+    serializedVersion: 2
+    rgba: 4294967295
+  GradientGray900:
+    serializedVersion: 2
+    rgba: 4292467161
+  GradientGray100:
+    serializedVersion: 2
+    rgba: 4294506744
+  GradientBlue900:
+    serializedVersion: 2
+    rgba: 4294503647
+  GradientBlue100:
+    serializedVersion: 2
+    rgba: 4294637040
