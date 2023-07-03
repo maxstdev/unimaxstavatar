@@ -39,7 +39,16 @@ namespace Maxst.Passport
         {
             OpenIDConnectArguments = openidArguments;
             IOpenIDConnectListener = listner;
+            if (openidArguments.TryGetValue(OpenIDConnectArgument.ClientID, out var clientID))
+            {
+                TokenRepo.Instance.ClientID = clientID;
+            }
+            else
+            {
+                TokenRepo.Instance.ClientID = string.Empty;
+            }
         }
+
 #if !UNITY_ANDROID && !UNITY_IOS
         public void SetWindowLoginServiceManger(MaxstIOpenIDConnectProvider IOpenIDConnectProvider)
         {
@@ -165,7 +174,6 @@ namespace Maxst.Passport
         {
             MainThreadDispatcher.StartCoroutine(
                     TokenRepo.Instance.GetPassportRefreshToken(
-                        OpenIDConnectArguments,
                         (status, token) =>
                         {
                             if (status != TokenStatus.Validate)
@@ -202,7 +210,6 @@ namespace Maxst.Passport
         {
             MainThreadDispatcher.StartCoroutine(
                 TokenRepo.Instance.GetPassportRefreshToken(
-                    OpenIDConnectArguments,
                     (status, token) =>
                     {
                         if (status != TokenStatus.Validate)
@@ -214,7 +221,6 @@ namespace Maxst.Passport
                         }
 
                         TokenRepo.Instance.PassportLogout(
-                            OpenIDConnectArguments,
                         () =>
                         {
                             Debug.Log($"[OpenIDConnectAdapter] SessionLogout success");
