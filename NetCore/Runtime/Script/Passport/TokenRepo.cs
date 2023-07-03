@@ -28,6 +28,7 @@ namespace Maxst.Passport
         private const string IdTokenKey = "MaxstSSO_IdToken";
         private const string AccessTokenKey = "MaxstSSO_AccessToken";
         private const string RefreshTokenKey = "MaxstSSO_RefreshToken";
+        private const string GrantType = "refresh_token";
         private Token token;
         private JwtTokenBody jwtTokenBody;
         private Coroutine refreshTokenCoroutine;
@@ -37,6 +38,8 @@ namespace Maxst.Passport
         private string RefreshToken => token?.refreshToken ?? "";
 
         public ReactiveProperty<TokenStatus> tokenStatus = new(TokenStatus.Expired);
+        public string ClientID { get; set; } = string.Empty;
+
 
         [RuntimeInitializeOnLoadMethod]
         public static void TokenRepoOnLoad()
@@ -64,7 +67,9 @@ namespace Maxst.Passport
                 //force test code
                 //jwtTokenBody.exp = CurrentTimeSeconds() + ESTIMATED_EXPIRATION_TIME + 5;
                 tokenStatus.Value = TokenStatus.Validate;
-                //StartRefreshTokenCoroutine();
+#if MAXST_TOKEN_AUTO_REFRESH
+                StartRefreshTokenCoroutine();
+#endif
             }
             else
             {
@@ -84,21 +89,22 @@ namespace Maxst.Passport
             callback?.Invoke(tokenStatus.Value, token);
         }
 
-        public IEnumerator GetPassportRefreshToken(OpenIDConnectArguments OpenIDConnectArguments, 
-            System.Action<TokenStatus, Token> callback,
+        public IEnumerator GetPassportRefreshToken(System.Action<TokenStatus, Token> callback,
              Action<Exception> RefreshFailAction)
         {
             yield return new WaitUntil(() => tokenStatus.Value != TokenStatus.Renewing);
             if (IsTokenExpired())
             {
-                OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.ClientID, out var ClientID);
-                string grant_type = "refresh_token";
-
-                Debug.Log($"GetPassportRefreshToken : {RefreshToken}");
-                
-                yield return FetchPassportRefreshToken(ClientID, grant_type, RefreshToken, RefreshFailAction);
+                //Debug.Log($"GetPassportRefreshToken : {RefreshToken}");
+                yield return FetchPassportRefreshToken(ClientID, GrantType, RefreshToken, RefreshFailAction);
             }
             callback?.Invoke(tokenStatus.Value, token);
+        }
+
+        private void StartRefreshTokenCoroutine()
+        {
+            StopRefreshTokenCoroutine();
+            refreshTokenCoroutine = StartCoroutine(RefreshTokenRoutine());
         }
 
         private void StopRefreshTokenCoroutine()
@@ -125,11 +131,34 @@ namespace Maxst.Passport
             return (long)(System.DateTime.UtcNow - new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc)).TotalSeconds;
         }
 
-        public void PassportLogout(OpenIDConnectArguments OpenIDConnectArguments, System.Action success = null, System.Action<System.Exception> fail = null) {
+        private IEnumerator RefreshTokenRoutine()
+        {
+            while (true)
+            {
+                if (IsTokenExpired())
+                {
+                    yield return FetchPassportRefreshToken(ClientID, GrantType, RefreshToken
+                        , e =>
+                        {
+
+                        });
+                    if (tokenStatus.Value != TokenStatus.Validate)
+                    {
+                        yield return new WaitForSeconds(5);
+                    }
+                }
+                else
+                {
+                    var time = MeasureRemainTimeSeconds();
+                    yield return new WaitForSeconds(System.Math.Max(time / 2, 5));
+                }
+            }
+        }
+
+        public void PassportLogout(System.Action success = null, System.Action<System.Exception> fail = null) 
+        {
             StopRefreshTokenCoroutine();
             System.IObservable<System.Object> ob = null;
-
-            OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.ClientID, out var ClientID);
 
             ob = AuthService.Instance.PassportLogout(BearerAccessToken, ClientID, RefreshToken, IdToken);
 
