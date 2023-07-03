@@ -5,7 +5,9 @@ namespace Maxst.Settings
 {
     public enum EnvType
     {
-        Prod = 0,
+        Alpha = 0,
+        Beta,
+        Prod
     }
     public enum DomainType
     {
@@ -34,7 +36,8 @@ namespace Maxst.Settings
         {
             return env switch
             {
-                EnvType.Prod => "-" + env.ToString().ToLower(),
+                EnvType.Beta => "-" + env.ToString().ToLower(),
+                EnvType.Alpha => "-" + env.ToString().ToLower(),
                 _ => "",
             };
         }
