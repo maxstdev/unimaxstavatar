@@ -6,7 +6,7 @@ namespace Maxst.Settings
 {
     public class EnvAdmin : Singleton<EnvAdmin>
     {
-        public ReactiveProperty<EnvType> CurrentEnv = new ReactiveProperty<EnvType>(EnvType.Beta);
+        public ReactiveProperty<EnvType> CurrentEnv = new ReactiveProperty<EnvType>(EnvType.Prod);
         public ReactiveProperty<DomainType> CurrentEnvUrl = new ReactiveProperty<DomainType>(DomainType.maxst);
         public ReactiveProperty<LngType> CurrentEnvLng = new ReactiveProperty<LngType>(LngType.ko);
 
@@ -44,7 +44,7 @@ namespace Maxst.Settings
 
         public void ConfigEnvType()
         {
-            CurrentEnv.Value = (EnvType)PlayerPrefs.GetInt("EnvType", (int)EnvType.Beta);
+            CurrentEnv.Value = (EnvType)PlayerPrefs.GetInt("EnvType", (int)EnvType.Prod);
             CurrentEnvUrl.Value = (DomainType)PlayerPrefs.GetInt("EnvUrlType", (int)DomainType.maxst);
             CurrentEnvLng.Value = (LngType)PlayerPrefs.GetInt("EnvLngType", (int)LngType.ko);
         }
