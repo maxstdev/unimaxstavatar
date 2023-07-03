@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a82f58764acb31a44bda92aa29d07a1f, type: 3}
-  m_Name: AuthMaxstUrlSettingBeta
+  m_Name: AuthMaxstUrlSettingProd
   m_EditorClassIdentifier: 
   keys: 00000000
   values:
