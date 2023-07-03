@@ -43,6 +43,12 @@ namespace Maxst.Passport
 #if !UNITY_ANDROID && !UNITY_IOS
         public void SetWindowLoginServiceManger(MaxstIOpenIDConnectProvider IOpenIDConnectProvider)
         {
+            if (OpenIDConnectService != null)
+            {
+                ServiceManager.RemoveService<MaxstOpenIDConnectService>();
+                OpenIDConnectService = null;
+            }
+
             OpenIDConnectService = new MaxstOpenIDConnectService(IOpenIDConnectProvider)
             {
                 OidcProvider = new MaxstOpenIDConnectProvider(IOpenIDConnectProvider)
@@ -95,32 +101,16 @@ namespace Maxst.Passport
             return URL;
         }
 
-        public async void OnRefreshToken()
+        public void OnRefreshToken(Action completeAction = null)
         {
-            bool complete = false;
             Debug.Log("[OpenIDConnectAdapter] OnRefresh");
-            RefreshToken(() => complete = true);
-            await Task.Run(() =>
-            {
-                while (!complete)
-                {
-                    Task.Delay(1);//wait
-                }
-            });
+            RefreshToken(completeAction);
         }
 
-        public async void OnLogout()
+        public void OnLogout(Action completeAction = null)
         {
-            bool complete = false;
             Debug.Log("[OpenIDConnectAdapter] OnLogout");
-            SessionLogout(() => complete = true);
-            await Task.Run(() =>
-            {
-                while (!complete)
-                {
-                    Task.Delay(1);//wait
-                }
-            });
+            SessionLogout(completeAction);
         }
 
         public void ShowSAMLProtocolLoginPage()
@@ -185,8 +175,7 @@ namespace Maxst.Passport
                                 complete?.Invoke();
                                 return;
                             }
-                            complete?.Invoke();
-
+                            
                             if (token == null)
                             {
                                 Debug.Log($"[OpenIDConnectAdapter] Token value does not exist");
@@ -198,10 +187,12 @@ namespace Maxst.Passport
 
                                 IOpenIDConnectListener?.OnSuccess(token, RequestType.REFRESH_TOKEN);
                             }
+                            complete?.Invoke();
                         },
                         (Exception) =>
                         {
                             IOpenIDConnectListener?.OnFail(ErrorCode.REFRESH, Exception);
+                            complete?.Invoke();
                         }
                     )
                 );
@@ -224,12 +215,12 @@ namespace Maxst.Passport
 
                         TokenRepo.Instance.PassportLogout(
                             OpenIDConnectArguments,
-                         () =>
-                         {
-                             Debug.Log($"[OpenIDConnectAdapter] SessionLogout success");
-                             complete?.Invoke();
-                             IOpenIDConnectListener?.OnLogout();
-                         },
+                        () =>
+                        {
+                            Debug.Log($"[OpenIDConnectAdapter] SessionLogout success");
+                            complete?.Invoke();
+                            IOpenIDConnectListener?.OnLogout();
+                        },
                         (Exception) =>
                         {
                             Debug.Log($"[OpenIDConnectAdapter] SessionLogout fail : {Exception}");
@@ -241,6 +232,7 @@ namespace Maxst.Passport
                     {
                         IOpenIDConnectListener?.OnFail(ErrorCode.LOGOUT_REFRESH, Exception);
                         Debug.Log($"[OpenIDConnectAdapter] Exception : {Exception}");
+                        complete?.Invoke();
                     }
                 )
             );
