@@ -73,6 +73,7 @@ namespace Maxst.Passport
             }
             else
             {
+                tokenStatus.Value = TokenStatus.Expired;
                 StopRefreshTokenCoroutine();
             }
         }
@@ -195,7 +196,6 @@ namespace Maxst.Passport
                     Debug.Log("[FetchPassportRefreshToken] : " + data);
                     if (data != null)
                     {
-                        tokenStatus.Value = TokenStatus.Validate;
                         Config(new Token
                         {
                             idToken = data.id_token,
@@ -272,7 +272,6 @@ namespace Maxst.Passport
                             }
                             else
                             {
-                                tokenStatus.Value = TokenStatus.Validate;
                                 Config(new Token
                                 {
                                     idToken = data.id_token,

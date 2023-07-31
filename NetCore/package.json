@@ -1,6 +1,6 @@
 {
   "name": "com.maxst.passport.core",
-  "version": "0.1.10",
+  "version": "0.1.12",
   "displayName": "Unity Passport Core",
   "description": "This is Passport of the source",
   "unity": "2021.3",
@@ -28,6 +28,13 @@
       "url": "https://github.com/abrusle/unity-scriptable-dictionary.git",
       "scopes": [
         "net.abrusle.unity-scriptable.dictionary"
+      ]
+    },
+    {
+      "name": "Unity Content Team Resources",
+      "url": "https://bitbucket.org/maxstcorp/content-team-resources.git",
+      "scopes": [
+        "com.maxst.content.resoruces"
       ]
     }
   ],
