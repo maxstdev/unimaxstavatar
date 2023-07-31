@@ -1,7 +1,10 @@
 using Cysharp.Threading.Tasks;
 using Maxst.Passport;
 using Maxst.Resource;
+using Maxst.Token;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,8 +17,11 @@ namespace Maxst.Avatar
         [SerializeField]
         private string sceneName = "AvatarScene";
 
+        private List<ResourceMeta> catalogJsonMetaList = new List<ResourceMeta>();
+        private List<ContainMeta> umaIdList = new List<ContainMeta>();
         private string catalogJsonPath;
         private string saveRecipe;
+        private string saveRecipeExtensions;
 
         private void Awake()
         {
@@ -36,7 +42,7 @@ namespace Maxst.Avatar
             );
         }
 
-        public async UniTask AvatarSaveDataListener(string recipeString)
+        public async void AvatarSaveDataListener(string recipeString)
         {
             string sub = TokenRepo.Instance.GetJwtTokenBody().sub;
 
@@ -46,9 +52,45 @@ namespace Maxst.Avatar
             await avatarResourceService.AvatarSaveDataUpload(GetAccessToken(), sub, recipeString);
         }
 
+        public async void AvatarSaveExtensionsDataListener(string recipeString)
+        {
+            string sub = TokenRepo.Instance.GetJwtTokenBody().sub;
+
+            Debug.Log($"[AvatarResourceManager] AvatarSaveExtensionsDataListener recipeString : {recipeString}");
+            Debug.Log($"[AvatarResourceManager] AvatarSaveExtensionsDataListener token sub : {sub}");
+
+            await avatarResourceService.AvatarSaveExtensionsDataUpload(GetAccessToken(), sub, recipeString);
+        }
+
         public void OnClickRecipe()
         {
+#if MAXST_SAVE_RECIPE_EXTENSIONS
+            DownLoadSaveRecipeExtensions();
+#else
             DownLoadSaveRecipe();
+#endif
+        }
+
+        public async void DownLoadSaveRecipeExtensions()
+        {
+            try
+            {
+                string token = GetAccessToken();
+                string sub = TokenRepo.Instance.GetJwtTokenBody().sub;
+                Container subContainer = await avatarResourceService.FetchSubContainer(token, sub);
+                Contain subContain = await avatarResourceService.FetchSaveRecipeContain(token, subContainer, true);
+
+                await avatarResourceService.FileDownload(token, subContain.uri, (json) =>
+                {
+                    Debug.Log($"[AvatarResourceManager] DownLoadSaveRecipeExtensions : {json}");
+                    saveRecipeExtensions = json;
+                    LoadSaveRecipeExtensions();
+                });
+            }
+            catch (Exception e)
+            {
+                Debug.Log($"[AvatarResourceManager] DownLoadSaveRecipeExtensions Exception : {e}");
+            }
         }
 
         public async void DownLoadSaveRecipe()
@@ -59,6 +101,7 @@ namespace Maxst.Avatar
                 string sub = TokenRepo.Instance.GetJwtTokenBody().sub;
                 Container subContainer = await avatarResourceService.FetchSubContainer(token, sub);
                 Contain subContain = await avatarResourceService.FetchSaveRecipeContain(token, subContainer);
+
                 await avatarResourceService.FileDownload(token, subContain.uri, (json) =>
                 {
                     Debug.Log($"[AvatarResourceManager] DownLoadSaveRecipe : {json}");
@@ -71,18 +114,172 @@ namespace Maxst.Avatar
             }
         }
 
+        private void LoadSaveRecipeExtensions()
+        {
+            var token = GetAccessToken();
+            var clientId = GetJwtTokenBody().azp;
+            var platform = Platform.StandaloneWindows64;
+
+            SaveRecipeExtensions saveRecipeExtensionsObj = JsonUtility.FromJson<SaveRecipeExtensions>(saveRecipeExtensions);
+
+            saveRecipeExtensionsObj.wardrobePaths.ForEach(each =>
+            {
+                SetSaveRecipeCatalogJsonPaths(token, each.clientId, platform.ToString(), each.slot, each.recipe);
+            });
+        }
+
         public void OnClickAvatar()
         {
             try
             {
-                FetchCatalogJsonPath(() => {
-                    SceneManager.LoadScene(sceneName);
+                FetchCatalogJsonPath(() =>
+                {
+                    //SceneManager.LoadScene(sceneName);
+
+                    var categoryList = new List<string>() { Category.Hair.ToString(), Category.Legs.ToString(), Category.Feet.ToString(), Category.Chest.ToString() };
+                    var token = GetAccessToken();
+                    var clientId = GetJwtTokenBody().azp;
+                    var platform = Platform.StandaloneWindows64;
+
+                    SetCategoryCatalogJsonPaths(token, clientId, platform, categoryList, () =>
+                    {
+                        SceneManager.LoadScene(sceneName);
+                    });
                 });
             }
             catch (Exception e)
             {
                 Debug.Log($"[AvatarResourceManager] FetchCatalogJsonPath Exception : {e}");
             }
+        }
+
+        private async void SetSaveRecipeCatalogJsonPaths(string token, string clientId, string platform, string category, string avatar_resource_name, Action onComplete = null)
+        {
+            var key = avatar_resource_name.Substring(0, avatar_resource_name.Length - 7);
+
+            Debug.Log($"[AvatarResourceManager] key : {key}");
+
+            ContainerMeta metaList = await FetchCategoryContainerMetaList(token, clientId, category);
+            ContainMeta item = metaList.contains
+                .SingleOrDefault(contain =>
+                {
+                    if (contain.extension != null)
+                    {
+                        contain.extension.TryGetValue("avatar_resource_name", out string slotRecipe);
+                        if (slotRecipe == null) return false;
+                        return RemoveExt(slotRecipe).Equals(key);
+                    }
+                    else return false;
+                });
+
+            Debug.Log($"[AvatarResourceManager] item : {item}");
+
+            if (item != null)
+            {
+                var saveRecipeCatalogJsonMeta = metaList.resources
+                    .Where(resource => resource.type.Equals("Catalog"))
+                    .Where(resource => resource.parents.Equals(item.uri))
+                    /*.Where(resource =>
+                    {
+                        var temp = resource.parents.Split("/");
+                        var length = temp.Length;
+                        return temp[length - 2].Equals(platform.ToString());
+                    })*/
+                    .ToList();
+
+                Debug.Log($"[AvatarResourceManager] saveRecipeCatalogJsonMeta : {saveRecipeCatalogJsonMeta[0].originalFileName}");
+
+                catalogJsonMetaList.AddRange(saveRecipeCatalogJsonMeta);
+            }
+
+            onComplete?.Invoke();
+        }
+
+        private string RemoveExt(string fileNameWithExt)
+        {
+            int lasttIndex = fileNameWithExt.LastIndexOf('.');
+            if (lasttIndex >= 0)
+            {
+                return fileNameWithExt.Substring(0, lasttIndex);
+            }
+            return fileNameWithExt;
+        }
+
+        private async void SetCategoryCatalogJsonPaths(string token, string clientId, Platform platform, List<string> categoryList, Action onComplete = null)
+        {
+            List<UniTask<ContainerMeta>> tasks = categoryList
+                .Select(category => FetchCategoryContainerMetaList(token, clientId, category))
+                .ToList();
+
+            List<ContainerMeta> metaList = new();
+            try
+            {
+                var (index, ContainerMeta) = await UniTask.WhenAny(tasks);
+                var i = 0;
+                while (categoryList.Count != i)
+                {
+                    metaList.Add(ContainerMeta);
+                    i++;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"[AvatarResourceManager] SetCategoryCatalogJsonPaths Exception : {ex}");
+            }
+
+            if (metaList != null)
+            {
+                /*
+                  umaIdList.AddRange(metaList
+                    .SelectMany(each => each.contains)
+                    .Where(each => each.extension.ContainsKey("avatar_resource_name"))
+                    .ToList());
+                */
+
+                catalogJsonMetaList.AddRange(metaList
+                                .SelectMany(metaList => metaList.resources)
+                                .Where(resource => resource.type.Equals("Catalog"))
+                                /*.Where(resource =>
+                                {
+                                    var temp = resource.parents.Split("/");
+                                    var length = temp.Length;
+                                    return temp[length - 2].Equals(platform.ToString());
+                                })*/);
+            }
+
+            onComplete?.Invoke();
+        }
+
+        private async UniTask<string> FetchCategoryCatalogJsonPath(string custom)
+        {
+            var catalogJson = ResourceSettingSO.Instance.CatalogJsonFileName;
+            var ext = ResourceSettingSO.Instance.Ext;
+
+            var containerMeta = await FetchCustomMeta(custom);
+            var resource = containerMeta.resources
+                .SingleOrDefault(res => res.originalFileName.Equals($"{catalogJson}{ext}"));
+            return (resource != null && !String.IsNullOrEmpty(resource.dataUrl)) ? resource.dataUrl : null;
+        }
+
+        public async UniTask<ContainerMeta> FetchCustomMeta(string custom)
+        {
+            string token = GetAccessToken();
+            var result = await avatarResourceService.FetchCustomMeta(token, custom);
+            return result;
+        }
+
+        public async UniTask<ContainerMeta> FetchCategoryContainerMetaList(string token, string clientId, string category)
+        {
+            var result = await avatarResourceService.FetchContainerMetaList(token, clientId, category, Type.all);
+            return result;
+        }
+
+        public async UniTask<ContainMeta> FetchContainerMeta(string slot, Action<ContainMeta> onComplete = null)
+        {
+            string token = GetAccessToken();
+            var result = await avatarResourceService.FetchContainerMeta(token, TokenRepo.Instance.GetJwtTokenBody().azp, slot, Type.meta);
+            onComplete?.Invoke(result);
+            return result;
         }
 
         public async void FetchCatalogJsonPath(Action onComplete)
@@ -98,15 +295,32 @@ namespace Maxst.Avatar
         {
             return TokenRepo.Instance.GetToken().accessToken;
         }
+        private JwtTokenBody GetJwtTokenBody()
+        {
+            return TokenRepo.Instance.GetJwtTokenBody();
+        }
 
         public string GetCatalogJsonPath()
         {
             return catalogJsonPath;
         }
+        public List<ResourceMeta> GetCatalogJsonMetaList()
+        {
+            return catalogJsonMetaList;
+        }
+
+        public List<ContainMeta> GetUmaIdList()
+        {
+            return umaIdList;
+        }
 
         public string GetSaveRecipe()
         {
             return saveRecipe;
+        }
+        public string GetSaveRecipeExtensions()
+        {
+            return saveRecipeExtensions;
         }
     }
 }

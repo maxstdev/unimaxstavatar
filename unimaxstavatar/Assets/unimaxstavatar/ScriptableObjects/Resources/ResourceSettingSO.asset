@@ -15,6 +15,7 @@ MonoBehaviour:
   BaseUrl: https://asset.maxverse.io
   Container: /MAXST_Gadgets/
   SaveFileName: save_recipe
+  SaveExtensionsFileName: save_recipe_extension
   CatalogJsonFileName: catalog_2
   Ext: .json
   Tusupload: tusUpload

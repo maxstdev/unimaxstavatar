@@ -1,3 +1,6 @@
+using Castle.Core.Internal;
+using Maxst.Passport;
+using Maxst.Resource;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -61,7 +64,8 @@ namespace Maxst.Avatar
                 });
         }
 
-        private string GetSaveRecipe() {
+        private string GetSaveRecipe()
+        {
             var o = GameObject.Find("AvatarDataManager");
             if (o != null)
             {
@@ -70,12 +74,26 @@ namespace Maxst.Avatar
             }
             return null;
         }
+        private string GetSaveRecipeExtensions()
+        {
+            var o = GameObject.Find("AvatarDataManager");
+            if (o != null)
+            {
+                var avatarDataManager = o.GetComponent<AvatarResourceManager>();
+                return avatarDataManager.GetSaveRecipeExtensions();
+            }
+            return null;
+        }
 
         public void InitAvatarCustom()
         {
             SetDefaultAvatar();
+#if MAXST_SAVE_RECIPE_EXTENSIONS
+            var loadRecipeString = GetSaveRecipeExtensions().IsNullOrEmpty() ? null : JsonUtility.FromJson<SaveRecipeExtensions>(GetSaveRecipeExtensions()).saveRecipeString;
+            Avatar.SetDefaultTextRecipe(defaultTextRecipe, loadRecipeString);
+#else
             Avatar.SetDefaultTextRecipe(defaultTextRecipe, GetSaveRecipe());
-
+#endif
             assetData = new UMAAssetData();
             undoRedoManager = new UndoRedoManager();
             undoRedoManager.SetExecuteCommandAction(() =>
@@ -241,10 +259,18 @@ namespace Maxst.Avatar
 
             assetData.GetWardrobeSlotList(Avatar.activeRace.name);
 
-            Avatar.activeRace.data.wardrobeSlots.ForEach(eachSlot =>
+            bool subjectUICreated = false;
+
+            var categoryNames = Enum.GetValues(typeof(Category));
+
+            foreach (var category in categoryNames)
             {
+                var eachSlot = category.ToString();
+
                 if (state == wardrobeConvertSO.GetFaceBodyValue(eachSlot))
                 {
+                    subjectUICreated = true;
+
                     var data = wardrobeConvertSO.GetEachSlotData(eachSlot);
 
                     categoryAreaUI.CreateSubject(eachSlot, data.koreanName.ToString(),
@@ -256,7 +282,12 @@ namespace Maxst.Avatar
                         observer.OnNext(onclick);
                     }
                 }
-            });
+            }
+
+            if (!subjectUICreated)
+            {
+                assetAreaUI.DeleteAllItem();
+            }
 
             yield return null;
         }
@@ -276,25 +307,63 @@ namespace Maxst.Avatar
             }
         }
 
-        public async void SaveRecipe()
+        public void SaveRecipeExtensions()
         {
             if (Avatar != null)
             {
-                var recipeString = Avatar.MaxstDoSave(false);
-                Debug.Log(recipeString);
+                var saveRecipeString = Avatar.MaxstDoSave(false);
+                var beforeSeveRecipeString = GetSaveRecipeExtensions();
+
+                var clientId = TokenRepo.Instance.GetJwtTokenBody().azp;
+                var saveRecipeExtensions = new SaveRecipeExtensions();
+                saveRecipeExtensions.SetSaveRecipeString(saveRecipeString);
+
+                if (!saveRecipeString.IsNullOrEmpty() && !beforeSeveRecipeString.IsNullOrEmpty())
+                {
+                    saveRecipeExtensions.SetSlotPath(clientId, beforeSeveRecipeString);
+                }
+                else
+                {
+                    saveRecipeExtensions.SetSlotPath(clientId);
+                }
+
+                var saveRecipeExtensionString = JsonUtility.ToJson(saveRecipeExtensions, true);
 
                 var o = GameObject.Find("AvatarDataManager");
                 if (o != null)
                 {
-                    var AvatarSample = o.GetComponent<AvatarResourceManager>();
-                    await AvatarSample.AvatarSaveDataListener(recipeString);
+                    var avatarDataManager = o.GetComponent<AvatarResourceManager>();
+                    avatarDataManager.AvatarSaveExtensionsDataListener(saveRecipeExtensionString);
+
+                    Debug.Log($"[MaxstAvatarCustom] save_recipe_extensions : {saveRecipeExtensionString}");
+                }
+            }
+        }
+
+        public void SaveRecipe()
+        {
+            if (Avatar != null)
+            {
+                var saveRecipeString = Avatar.MaxstDoSave(false);
+
+                var o = GameObject.Find("AvatarDataManager");
+                if (o != null)
+                {
+                    var avatarDataManager = o.GetComponent<AvatarResourceManager>();
+                    avatarDataManager.AvatarSaveDataListener(saveRecipeString);
+
+                    Debug.Log($"[MaxstAvatarCustom] saveRecipeString : {saveRecipeString}");
                 }
             }
         }
 
         private void NextScene()
         {
+#if MAXST_SAVE_RECIPE_EXTENSIONS
+            SaveRecipeExtensions();
+#else
             SaveRecipe();
+#endif
             Debug.Log("[MaxstAvatarCustom] Next Scene!!");
         }
 

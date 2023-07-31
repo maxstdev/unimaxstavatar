@@ -12,6 +12,7 @@ public class ResourceSettingSO : ScriptableSingleton<ResourceSettingSO>
     public string BaseUrl;
     public string Container;
     public string SaveFileName;
+    public string SaveExtensionsFileName;
     public string CatalogJsonFileName;
     public string Ext;
     public string Tusupload;

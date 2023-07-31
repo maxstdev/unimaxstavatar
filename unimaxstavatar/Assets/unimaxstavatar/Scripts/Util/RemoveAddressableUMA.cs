@@ -4,10 +4,11 @@ using UnityEngine;
 using UnityEditor;
 using UMA;
 
+#if UNITY_EDITOR
+
 namespace Maxst.Resource
 {
 
-#if UNITY_EDITOR
     public class RemoveAddressableUMA : EditorWindow
     {
 

@@ -22,7 +22,7 @@ namespace Maxst.Avatar
             subject.OnclickButton = () =>
             {
                 SubjectSelectChange(subject);
-                categoryWardrobeslot.Value = slot;
+                categoryWardrobeslot.SetValueAndForceNotify(slot);
                 categoryChangeViewType.Value = GetSlotViewType(slot);
             };
             onclick = subject.OnclickButton;

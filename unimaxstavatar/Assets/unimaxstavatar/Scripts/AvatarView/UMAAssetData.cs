@@ -74,14 +74,17 @@ namespace Maxst.Avatar
         {
             var assetdatas = new List<AssetAreaData>();
 
-            currentSlotList = new List<UMATextRecipe>(currentRaceRecipes[wardrobeslotName]);
-
-            foreach (var slot in currentSlotList)
+            if (currentRaceRecipes.ContainsKey(wardrobeslotName))
             {
-                string slotname = slot.DisplayValue != "" ? slot.DisplayValue : slot.name;
-                Sprite slotThumb = slot.GetWardrobeRecipeThumbFor(currentRacename);
+                currentSlotList = new List<UMATextRecipe>(currentRaceRecipes[wardrobeslotName]);
 
-                assetdatas.Add(new AssetAreaData { slotName = slotname, thumbnail = slotThumb, recipeString = slot.recipeString });
+                foreach (var slot in currentSlotList)
+                {
+                    string slotname = slot.DisplayValue != "" ? slot.DisplayValue : slot.name;
+                    Sprite slotThumb = slot.GetWardrobeRecipeThumbFor(currentRacename);
+
+                    assetdatas.Add(new AssetAreaData { slotName = slotname, thumbnail = slotThumb, recipeString = slot.recipeString });
+                }
             }
 
             return assetdatas;

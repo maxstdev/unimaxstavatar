@@ -1,5 +1,7 @@
+using Maxst.Avatar;
 using Retrofit;
 using Retrofit.HttpImpl;
+using Retrofit.Parameters;
 using System;
 using System.Reflection;
 using UnityEngine;
@@ -55,6 +57,21 @@ namespace Maxst.Resource
         public IObservable<Contain> FetchContain([Retrofit.Parameters.Header("Authorization")] string accessToken, string uri)
         {
             return SendRequest<Contain>(MethodBase.GetCurrentMethod(), accessToken, uri) as IObservable<Contain>;
+        }
+
+        public IObservable<ContainMeta> FetchContainerMeta([Retrofit.Parameters.Header("Authorization")] string accessToken, [Path("clientId")] string clientId, [Path("appFolderPrefix")] string appFolderPrefix, [Path("category")] string category, [Query("type")] string type)
+        {
+            return SendRequest<ContainMeta>(MethodBase.GetCurrentMethod(), accessToken, clientId, appFolderPrefix, category, type) as IObservable<ContainMeta>; ;
+        }
+
+        public IObservable<ContainerMeta> FetchCategoryContainerMetaList([Retrofit.Parameters.Header("Authorization")] string accessToken, [Path("clientId")] string clientId, [Path("appFolderPrefix")] string appFolderPrefix, [Path("category")] string category, [Query("type")] string type)
+        {
+            return SendRequest<ContainerMeta>(MethodBase.GetCurrentMethod(), accessToken, clientId, appFolderPrefix, category, type) as IObservable<ContainerMeta>; 
+        }
+
+        public IObservable<ContainerMeta> FetchCustomMeta([Retrofit.Parameters.Header("Authorization")] string accessToken, [Path("custom")] string custom, [Query("type")] string type)
+        {
+            return SendRequest<ContainerMeta>(MethodBase.GetCurrentMethod(), accessToken, custom, type) as IObservable<ContainerMeta>;
         }
     }
 }

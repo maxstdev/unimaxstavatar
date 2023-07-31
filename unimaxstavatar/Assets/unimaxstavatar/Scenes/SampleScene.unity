@@ -455,7 +455,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -589,7 +589,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -871,6 +871,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LoginMenuPrefab
       objectReference: {fileID: 0}
+    - target: {fileID: 6828201990817584785, guid: 98752dc474e94c9438fce61423c2bdd1, type: 3}
+      propertyPath: openidConnectArguments
+      value: 
+      objectReference: {fileID: 11400000, guid: 33752c9b7acc3be4ebf0dd198bd672bf, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 98752dc474e94c9438fce61423c2bdd1, type: 3}
 --- !u!224 &1369274913 stripped
