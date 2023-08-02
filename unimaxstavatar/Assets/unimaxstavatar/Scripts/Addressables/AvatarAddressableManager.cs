@@ -169,11 +169,6 @@ public class AvatarAddressableManager : MonoBehaviour
 
         if (catalogJsonMetaList.Count > 0)
         {
-            catalogJsonMetaList.ForEach((item) =>
-            {
-                Debug.Log($"[AvatarAddressableManager] catalogJsonPath : {item.dataUrl}");
-            });
-
             var temp = catalogJsonMetaList.Distinct().ToList();
 
             foreach (var each in temp)
@@ -181,7 +176,8 @@ public class AvatarAddressableManager : MonoBehaviour
                 Debug.Log($"[AvatarAddressableManager] catalogJson path : {each.dataUrl}");
 
                 var content = await Addressables.LoadContentCatalogAsync(each.dataUrl).Task;
-                keys.AddRange(labels.Where(s => content.Keys.Contains(s)).ToList());
+                if (content != null) keys.AddRange(labels.Where(s => content.Keys.Contains(s)).ToList());
+                //if (content != null) keys.AddRange(content.Keys.Select(s => s.ToString()));
             }
         }
 
@@ -189,15 +185,19 @@ public class AvatarAddressableManager : MonoBehaviour
         {
             var catalogJsonPath = GetCatalogJsonPath();
             var publicContent = await Addressables.LoadContentCatalogAsync(catalogJsonPath).Task;
-            keys.AddRange(labels.Where(s => publicContent.Keys.Contains(s)).ToList());
+
+            if (publicContent != null) keys.AddRange(labels.Where(s => publicContent.Keys.Contains(s)).ToList());
+            //if (publicContent != null) keys.AddRange(publicContent.Keys.Select(s => s.ToString()));
         }
 
         //UMAAssetIndexer.Instance.SetMaxstUmaIdList(GetUmaIdList());
 
-        if (keys.Count > 0) {
+        if (keys.Count > 0)
+        {
             var recipeOp = UMAAssetIndexer.Instance.LoadLabelList(keys, true);
             recipeOp.Completed += (obj) =>
             {
+                Debug.Log($"error obgj : {obj}");
                 Recipes_Loaded(obj);
             };
 
@@ -249,7 +249,7 @@ public class AvatarAddressableManager : MonoBehaviour
 
         if (updateCatalogPaths.Count > 0)
         {
-            foreach(var path in updateCatalogPaths)
+            foreach (var path in updateCatalogPaths)
             {
                 Debug.Log(path);
             }

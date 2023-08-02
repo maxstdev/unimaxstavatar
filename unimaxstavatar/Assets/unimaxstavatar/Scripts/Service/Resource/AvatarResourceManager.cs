@@ -157,41 +157,47 @@ namespace Maxst.Avatar
         {
             var key = avatar_resource_name.Substring(0, avatar_resource_name.Length - 7);
 
-            Debug.Log($"[AvatarResourceManager] key : {key}");
-
             ContainerMeta metaList = await FetchCategoryContainerMetaList(token, clientId, category);
-            ContainMeta item = metaList.contains
-                .SingleOrDefault(contain =>
-                {
-                    if (contain.extension != null)
-                    {
-                        contain.extension.TryGetValue("avatar_resource_name", out string slotRecipe);
-                        if (slotRecipe == null) return false;
-                        return RemoveExt(slotRecipe).Equals(key);
-                    }
-                    else return false;
-                });
-
-            Debug.Log($"[AvatarResourceManager] item : {item}");
-
-            if (item != null)
+            if (metaList.contains != null)
             {
-                var saveRecipeCatalogJsonMeta = metaList.resources
-                    .Where(resource => resource.type.Equals("Catalog"))
-                    .Where(resource => resource.parents.Equals(item.uri))
-                    /*.Where(resource =>
+                ContainMeta item = metaList.contains
+                    .SingleOrDefault(contain =>
                     {
-                        var temp = resource.parents.Split("/");
-                        var length = temp.Length;
-                        return temp[length - 2].Equals(platform.ToString());
-                    })*/
-                    .ToList();
+                        if (contain.extension != null)
+                        {
+                            contain.extension.TryGetValue("avatar_resource_name", out string slotRecipe);
+                            if (slotRecipe == null) return false;
 
-                Debug.Log($"[AvatarResourceManager] saveRecipeCatalogJsonMeta : {saveRecipeCatalogJsonMeta[0].originalFileName}");
+                            if (RemoveExt(slotRecipe).Equals(key)) Debug.Log($"[AvatarResourceManager] key : {key}");
 
-                catalogJsonMetaList.AddRange(saveRecipeCatalogJsonMeta);
+                            return RemoveExt(slotRecipe).Equals(key);
+                        }
+                        else return false;
+                    });
+
+                Debug.Log($"[AvatarResourceManager] item : {item}");
+
+                if (item != null)
+                {
+                    /*var saveRecipeCatalogJsonMeta = metaList.resources
+                        .Where(resource => resource.type.Equals("Catalog"))
+                        *//*.Where(resource =>
+                        {
+                            var temp = resource.parents.Split("/");
+                            var length = temp.Length;
+                            return temp[length - 2].Equals(platform.ToString());
+                        })*//*
+                        .ToList();*/
+
+                    metaList.resources.ForEach(resource => {
+                        resource.extension.TryGetValue("avatar_resource_name", out string avatar_resource_name);
+                        if (avatar_resource_name != null && RemoveExt(avatar_resource_name).Equals(key)) {
+                            catalogJsonMetaList.Add(resource);
+                        }
+                    });
+                }
             }
-
+            
             onComplete?.Invoke();
         }
 
@@ -202,6 +208,7 @@ namespace Maxst.Avatar
             {
                 return fileNameWithExt.Substring(0, lasttIndex);
             }
+
             return fileNameWithExt;
         }
 
@@ -211,21 +218,7 @@ namespace Maxst.Avatar
                 .Select(category => FetchCategoryContainerMetaList(token, clientId, category))
                 .ToList();
 
-            List<ContainerMeta> metaList = new();
-            try
-            {
-                var (index, ContainerMeta) = await UniTask.WhenAny(tasks);
-                var i = 0;
-                while (categoryList.Count != i)
-                {
-                    metaList.Add(ContainerMeta);
-                    i++;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.Log($"[AvatarResourceManager] SetCategoryCatalogJsonPaths Exception : {ex}");
-            }
+            ContainerMeta[] metaList = await UniTask.WhenAll(tasks);
 
             if (metaList != null)
             {
@@ -236,9 +229,13 @@ namespace Maxst.Avatar
                     .ToList());
                 */
 
-                catalogJsonMetaList.AddRange(metaList
+                var temp = metaList
+                                .Where(meta => meta.resources != null)
                                 .SelectMany(metaList => metaList.resources)
                                 .Where(resource => resource.type.Equals("Catalog"))
+                                .ToList();
+
+                catalogJsonMetaList.AddRange(temp
                                 /*.Where(resource =>
                                 {
                                     var temp = resource.parents.Split("/");

@@ -112,8 +112,9 @@ namespace Maxst.Avatar
                     Debug.Log(error);
                     Debug.Log(error.Message);
 
-                    containerMeta.TrySetException(error);
-                    containerMeta.SetCanceled();
+                    containerMeta.TrySetResult(new());
+                    //containerMeta.TrySetException(error);
+                    //containerMeta.SetCanceled();
                 });
             return await containerMeta.Task;
         }
