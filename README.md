@@ -12,16 +12,44 @@ unimaxstavatar package is for developing Unity apps that target native platforms
 
 개발사 및 제작사는 MAXST에서 자체 제작한 아바타 모델과 아이템들은 물론 다양한 참여자들이 함께 만들어 나가는 아바타 시스템을 활용하여 손쉽게 사용자들에게 아바타 기반의 서비스를 제공할 수 있습니다. 서비스 사용자는 지속적으로 확장되어 나가는 아바타 시스템의 혜택을 통해 다양한 아바타 및 아이템들을 활용하여 더 나은 서비스 경험과 편의성을 느낄 수 있습니다.
 
+자세한 내용은 [maxverse.io](https://doc.maxverse.io/avatar) 에서 확인 가능합니다.
+
+## 아바타 리소스 제작 및 업로드  
+
+[기본으로 제공되는 리소스](https://doc.maxverse.io/avatar-getting-started) 외에 직접 재작한  아바타리소스를 앱에서 이용하고 싶다면, [제작 가이드1](https://doc.maxverse.io/avatar-modeling), [제작 가이드2](https://doc.maxverse.io/avatar-create-item) 를 참고하여 리소스를 준비해야 합니다.  
+
+준비된 아바타리소스는 [Unity Addressables](https://docs.unity3d.com/Manual/com.unity.addressables.html), [아이템 빌드](https://doc.maxverse.io/avatar-build-item) 를 참고하여 리소스가 주소를 통해 호출될수있도록 변경되어야 합니다.  
+
+변경된 데이터는 [아이템 업로드](https://doc.maxverse.io/avatar-upload-item) 내용을 참고하여 맥스버스 콘솔을 통하여 업로드를 진행합니다. 
+
+업로드가 완료되면, SampleCode를 참고하여 앱에서 로드하여 사용이 가능합니다.
+
 ### SampleCode
 
-아바타 설정화면 호출
+아바타 설정화면 호출1
 ```
 FetchCatalogJsonPath(() => {
     SceneManager.LoadScene(sceneName);
 });
 ```
 
-아바타 리소스 조회
+아바타 설정화면 호출2
+```
+FetchCatalogJsonPath(() =>
+{
+    var categoryList = new List<string>() { Category.Hair.ToString(), Category.Legs.ToString(), Category.Feet.ToString(), Category.Chest.ToString() };
+    var token = GetAccessToken();
+    var clientId = GetJwtTokenBody().azp;
+    var platform = Platform.StandaloneWindows64;
+
+    SetCategoryCatalogJsonPaths(token, clientId, platform, categoryList, () =>
+    {
+        SceneManager.LoadScene(sceneName);
+    });
+});
+```
+
+아바타 리소스 조회1
 ```
 public async void FetchCatalogJsonPath(Action onComplete)
 {
@@ -33,10 +61,36 @@ public async void FetchCatalogJsonPath(Action onComplete)
 }
 ```
 
-* unipassport를 활용한 Token 값이 있어야 해당 저장소의 소스코드가 정상동작 하며, unipassport 관련 상세내용은 [GitHub unipassport Repositorie](https://github.com/maxstdev/unipassport) 에서 확인 가능합니다.
+아바타 리소스 조회2
+```
+private async void SetCategoryCatalogJsonPaths(string token, string clientId, Platform platform, List<string> categoryList, Action onComplete = null)
+{
+    List<UniTask<ContainerMeta>> tasks = categoryList
+        .Select(category => FetchCategoryContainerMetaList(token, clientId, category))
+        .ToList();
+
+    ContainerMeta[] metaList = await UniTask.WhenAll(tasks);
+
+    if (metaList != null)
+    {
+
+        var temp = metaList
+                        .Where(meta => meta.resources != null)
+                        .SelectMany(metaList => metaList.resources)
+                        .Where(resource => resource.type.Equals("Catalog"))
+                        .ToList();
+
+        catalogJsonMetaList.AddRange(temp);
+    }
+
+    onComplete?.Invoke();
+}
+```
+
+* unipassport를 활용한 Token 값이 있어야 해당 저장소의 소스코드가 정상동작 하며, unipassport 관련 상세내용은 [passport guide](https://doc.maxverse.io/passport-login-sdk) 에서 확인 가능합니다.
 
 ### Unity Version
-* Unity 2021.3.16f1
+* [Unity 2021.3.16f1](https://unity.com/releases/editor/whats-new/2021.3.16)
 
 ### Platform
 * Android
@@ -44,10 +98,10 @@ public async void FetchCatalogJsonPath(Action onComplete)
 * Window
 
 ## Docs about unimaxstavatar
-You can check docs and guides at [unimaxstavatar](https://doc.maxverse.io/avatar-system-apply)
+You can check docs and guides at [avatar-apply](https://doc.maxverse.io/avatar-apply)
 
 ## License
-The source code for the site is licensed under the MIT license, which you can find in the [License.txt](https://github.com/maxstdev/unimaxstavatar/blob/main/LICENSE) file.
+The source code for the site is licensed under the MIT license, which you can find in the [License.txt](https://bitbucket.org/maxstcorp/unimaxstavatar/src/develop/License.txt) file.
 
 ### Third Party
 * [UniRx](https://github.com/neuecc/UniRx.git) : [MIT license](https://github.com/neuecc/UniRx/blob/master/LICENSE)
