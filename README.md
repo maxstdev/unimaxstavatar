@@ -101,7 +101,7 @@ private async void SetCategoryCatalogJsonPaths(string token, string clientId, Pl
 You can check docs and guides at [avatar-apply](https://doc.maxverse.io/avatar-apply)
 
 ## License
-The source code for the site is licensed under the MIT license, which you can find in the [License.txt](https://bitbucket.org/maxstcorp/unimaxstavatar/src/develop/License.txt) file.
+The source code for the site is licensed under the MIT license, which you can find in the [LICENSE](https://github.com/maxstdev/unimaxstavatar/blob/main/LICENSE) file.
 
 ### Third Party
 * [UniRx](https://github.com/neuecc/UniRx.git) : [MIT license](https://github.com/neuecc/UniRx/blob/master/LICENSE)
