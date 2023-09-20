@@ -20,6 +20,7 @@ using UnityEditor;
 using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using UMA;
+using System.Resources;
 #endif
 
 namespace UMA
@@ -30,6 +31,7 @@ namespace UMA
         public static float DefaultLife = 5.0f;
 
 #if UMA_ADDRESSABLES
+
         private class CachedOp
         {
             public AsyncOp Operation;
@@ -795,6 +797,8 @@ namespace UMA
 
         public T GetAsset<T>(string name) where T : UnityEngine.Object
         {
+            // TODO set uuid
+
             var thisAssetItem = GetAssetItem<T>(name);
             if (thisAssetItem != null)
             {
@@ -823,7 +827,6 @@ namespace UMA
 			}
 			return results;
 		}
-
 
 		private void internalGetRecipes(string race, ref Dictionary<string, HashSet<UMATextRecipe>> results)
 		{
@@ -1134,13 +1137,10 @@ namespace UMA
                 }
             }
 
+            // MAXST CUSTOM
             var op = Addressables.LoadAssetsAsync<UnityEngine.Object>(Keys, result =>
             {
-				// The last items is now passed here AFTER the completed event, breaking everything. 
-				// change to event model here.
-                //ProcessedItems.Add(result);
-                //ProcessNewItem(result, true, keepLoaded);
-            }, Addressables.MergeMode.Union, true);
+            }, Addressables.MergeMode.Union, false);
 			op.Completed += ProcessItems;
             if (!keepLoaded)
             {
@@ -1152,12 +1152,27 @@ namespace UMA
             return op;
         }
 
-		private void ProcessItems(AsyncOp Op) {
+        private void ProcessItems(AsyncOp Op) {
 			if (Op.IsDone) {
-				foreach(var o in Op.Result) {
-					//ProcessedItems.Add(o);
-					ProcessNewItem(o, true, true);
-				}
+                // MAXST CUSTOM
+                if (Op.Result == null)
+                {
+                    Debug.LogWarning("Op.Result Null");
+                }
+                else
+                {
+                    foreach (var o in Op.Result)
+                    {
+                        //ProcessedItems.Add(o);
+                        //ProcessNewItem(o, true, true);
+
+                        // MAXST CUSTOM
+                        if (o != null)
+                        {
+                            ProcessNewItem(o, true, true);
+                        }
+                    }
+                }
 			}
 		}
 
@@ -1188,7 +1203,23 @@ namespace UMA
             if (!IsIndexedType(result.GetType())) // JRRM
                 return;
 
+            // MAXST CUSTOM
+            if (isAddressable)
+            {
+                ConvertResult(ref result);
+            }
+
             AssetItem resultItem = GetAssetItemForObject(result);
+
+            /*var uuidList = maxstUmaIdList
+                .Where(contain => contain.extension["avatar_resource_name"].Equals(resultItem._Name))
+                .ToList();
+            */
+
+            /*
+            ResourceMeta meta = catalogJsonMetaList
+                .Find(meta => meta.originalFileName.Equals(resultItem._Name));
+            */
             if (resultItem == null)
             {
                 AssetItem ai = new AssetItem(result.GetType(), result);
@@ -1230,6 +1261,52 @@ namespace UMA
                     }
                 }
             }
+        }
+
+        // MAXST CUSTOM
+        public string changeAddressableName = "";
+        // MAXST CUSTOM
+        private void ConvertResult(ref UnityEngine.Object result)
+        {
+            if (result is UMAWardrobeRecipe)
+            {
+                UMAWardrobeRecipe recipe = result as UMAWardrobeRecipe;
+                ChangeRecipeInfo(ref recipe);
+            }
+            if (result is SlotDataAsset)
+            {
+                SlotDataAsset sd = result as SlotDataAsset;
+                if (!string.IsNullOrEmpty(sd.slotName) && !sd.slotName.Contains(changeAddressableName))
+                    sd.slotName = changeAddressableName;
+            }
+            if (result is OverlayDataAsset)
+            {
+                OverlayDataAsset od = result as OverlayDataAsset;
+                if (!string.IsNullOrEmpty(od.overlayName) && !od.overlayName.Contains(changeAddressableName))
+                    od.overlayName = changeAddressableName;
+            }
+        }
+        // MAXST CUSTOM
+        private void ChangeRecipeInfo(ref UMAWardrobeRecipe recipe)
+        {
+            recipe.name = changeAddressableName;
+
+            var packeRecipe = recipe.PackedLoad();
+            foreach (var slot in packeRecipe.slotsV3)
+            {
+                if (slot != null && !string.IsNullOrEmpty(slot.id) && !slot.id.Contains(changeAddressableName))
+                {
+                    slot.id = changeAddressableName;
+                    foreach (var overlay in slot.overlays)
+                    {
+                        if (overlay != null)
+                        {
+                            overlay.id = changeAddressableName;
+                        }
+                    }
+                }
+            }
+            recipe.PackedSave(packeRecipe, null);
         }
 
         public void PostBuildMaterialFixup()
@@ -1743,6 +1820,32 @@ namespace UMA
                 AddRaceRecipe(uwr);
 			}
 		}
+
+        // MAXST CUSTOM
+        public void RemoveRecipe(UnityEngine.Object obj)
+        {
+            string Name = AssetItem.GetEvilName(obj);
+
+            // Leave if this is an unreferenced type - for example, a texture (etc).
+            // This can happen because these are referenced by the Overlay.
+            if (!TypeToLookup.ContainsKey(obj.GetType()))
+                return;
+
+            if(obj is UMAWardrobeRecipe)
+            {
+                UMAWardrobeRecipe uwr = obj as UMAWardrobeRecipe;
+                foreach (string raceName in uwr.compatibleRaces)
+                {
+                    if (raceRecipes.ContainsKey(raceName))
+                    {
+                        var slotrecipes = raceRecipes[raceName];
+                        var utr = slotrecipes[uwr.wardrobeSlot];
+
+                        utr.Remove(uwr);
+                    }
+                }
+            }
+        }
 
 		/// <summary>
 		/// Creates a lookup dictionary for a list. Used when reloading after deserialization

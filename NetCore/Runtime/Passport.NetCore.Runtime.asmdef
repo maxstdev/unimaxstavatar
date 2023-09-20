@@ -6,7 +6,8 @@
         "GUID:560b04d1a97f54a4e82edc0cbbb69285",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
         "GUID:cbfdca87e247d3a49986d4759bbc1ccc",
-        "GUID:8e3d269cf04faab4894881f162683392"
+        "GUID:8e3d269cf04faab4894881f162683392",
+		"GUID:478a2357cc57436488a56e564b08d223"
     ],
     "includePlatforms": [
         "Android",

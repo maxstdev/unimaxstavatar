@@ -12,11 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3385a423a1735eb49af4ff327e0ad669, type: 3}
   m_Name: ResourceSettingSO
   m_EditorClassIdentifier: 
-  BaseUrl: https://asset.maxverse.io
-  Container: /MAXST_Gadgets/
-  SaveFileName: save_recipe
-  SaveExtensionsFileName: save_recipe_extension
-  CatalogJsonFileName: catalog_2
-  Ext: .json
-  Tusupload: tusUpload
-  Platform: 0
+  BaseUrl: https://api.maxverse.io
+  Platform: 2

@@ -9,21 +9,21 @@ namespace Maxst.Resource
     {
         [JsonProperty("wardrobeSet")]
         public List<Wardrobe> wardrobeSet;
-        /*
+
         [JsonProperty("packedRecipeType")]
         public string packedRecipeType;
-        
+
         [JsonProperty("name")]
         public string name;
-        
+
         [JsonProperty("race")]
         public string race;
-        
+/*
         [JsonProperty("characterColors")]
         public string characterColors;
-        
+*/
         [JsonProperty("raceAnimatorController")]
-        public string raceAnimatorController;*/
+        public string raceAnimatorController;
 
         [Serializable]
         public class Wardrobe

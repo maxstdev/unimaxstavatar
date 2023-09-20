@@ -6,6 +6,7 @@ namespace Maxst.Settings
     public enum OpenIDConnectArgument
     {
         ClientID = 0,
+        ClientSecret,
         ResponseType,
         Scope,
         AndroidRedirectUri,
@@ -13,7 +14,7 @@ namespace Maxst.Settings
         WebRedirectUri,
     }
 
-    [CreateAssetMenu(fileName = "OpenIDConnectArguments", menuName = "Packages/MaxSSO/OpenIDConnectArguments", order = 1000)]
+    [CreateAssetMenu(fileName = "OpenIDConnectArguments", menuName = "Packages/Passport/OpenIDConnectArguments", order = 1000)]
     public class OpenIDConnectArguments : ScriptableDictionary<OpenIDConnectArgument, string>
     {
         public void SetValue(OpenIDConnectArgument key, string value)

@@ -4,24 +4,62 @@ using i5.Toolkit.Core.Utilities;
 using Maxst.Settings;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using UniRx;
+#if UNITY_EDITOR
+using Unity.EditorCoroutines.Editor;
+#endif
 using UnityEngine;
 
 
 namespace Maxst.Passport
 {
-    public class OpenIDConnectAdapter
+#if UNITY_EDITOR || UNITY_STANDALONE
+    public partial class OpenIDConnectAdapter : MaxstIOpenIDConnectProvider
     {
+
+        void MaxstIOpenIDConnectProvider.OnAuthorazationCode(string code)
+        {
+            Debug.Log($"OnAuthorazationCode : {code}");
+            AcceceToken(code);
+        }
+
+        string MaxstIOpenIDConnectProvider.GetLoginPageURL(string redirectUri)
+        {
+            switch (SampleConfig.Instance.clientType)
+            {
+                case ClientType.Public:
+                    var PKCEManagerInstance = PKCEManager.GetInstance();
+                    var CodeVerifier = PKCEManagerInstance.GetCodeVerifier();
+                    var CodeChallenge = PKCEManagerInstance.GetCodeChallenge(CodeVerifier);
+                    return GetURL(redirectUri, CodeVerifier, CodeChallenge);
+
+                case ClientType.Confidential:
+                    return GetConfidentialLoginURL(redirectUri);
+
+                default:
+                    Debug.Log("GetLoginPageURL error!");
+                    return null;
+            }
+        }
+    }
+#endif
+
+    public partial class OpenIDConnectAdapter
+    {
+        private ClientType clientType;
         public OpenIDConnectArguments OpenIDConnectArguments;
-        public IOpenIDConnectListener IOpenIDConnectListener { get; set; } = null;
+        public IOpenIDConnectListener IOpenIDConnectListener = null;
 
         private string CodeVerifier;
+        private string ClientSecret;
+
         private static OpenIDConnectAdapter instance;
 
-#if !UNITY_ANDROID && !UNITY_IOS
+#if UNITY_EDITOR || UNITY_STANDALONE
         private MaxstOpenIDConnectService OpenIDConnectService;
 #endif
+        private OpenIDConnectAdapter() { }
+
         public static OpenIDConnectAdapter Instance
         {
             get
@@ -35,10 +73,15 @@ namespace Maxst.Passport
             }
         }
 
-        public void InitOpenIDConnectAdapter(OpenIDConnectArguments openidArguments, IOpenIDConnectListener listner)
+        public void SetLoginListener(IOpenIDConnectListener listener)
         {
+            IOpenIDConnectListener = listener;
+        }
+
+        public void InitOpenIDConnectAdapter(OpenIDConnectArguments openidArguments, PassportConfig passportConfig = null)
+        {
+            clientType = passportConfig == null ? ClientType.Public : passportConfig.clientType;
             OpenIDConnectArguments = openidArguments;
-            IOpenIDConnectListener = listner;
             if (openidArguments.TryGetValue(OpenIDConnectArgument.ClientID, out var clientID))
             {
                 TokenRepo.Instance.ClientID = clientID;
@@ -47,30 +90,49 @@ namespace Maxst.Passport
             {
                 TokenRepo.Instance.ClientID = string.Empty;
             }
+
+            SetWindowLoginServiceManger(this);
         }
 
-#if !UNITY_ANDROID && !UNITY_IOS
-        public void SetWindowLoginServiceManger(MaxstIOpenIDConnectProvider IOpenIDConnectProvider)
+        public void SetWindowLoginServiceManger(object provider)
         {
+            MaxstIOpenIDConnectProvider IOpenIDConnectProvider = provider as MaxstIOpenIDConnectProvider;
+#if UNITY_EDITOR || UNITY_STANDALONE
             if (OpenIDConnectService != null)
             {
-                ServiceManager.RemoveService<MaxstOpenIDConnectService>();
+                ServiceManager.Instance.InstRemoveService<MaxstOpenIDConnectService>();
                 OpenIDConnectService = null;
             }
+
+            ServiceManager.Instance.CreateRunner();
 
             OpenIDConnectService = new MaxstOpenIDConnectService(IOpenIDConnectProvider)
             {
                 OidcProvider = new MaxstOpenIDConnectProvider(IOpenIDConnectProvider)
             };
-            ServiceManager.RegisterService(OpenIDConnectService);
-        }
+            ServiceManager.Instance.InstRegisterService(OpenIDConnectService);
 #endif
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void SetDeeplink()
         {
             Application.deepLinkActivated += Instance.OnSuccessAuthorization;
         }
 
+        public void ShowOIDCProtocolLoginPage()
+        {
+#if UNITY_ANDROID
+            OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.AndroidRedirectUri, out var RedirectURI);
+            Application.OpenURL(GetConfidentialLoginURL(RedirectURI));
+#elif UNITY_IOS
+            OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.iOSRedirectUri, out var RedirectURI);
+            Application.OpenURL(GetConfidentialLoginURL(RedirectURI));
+#else
+            OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.WebRedirectUri, out var RedirectURI);
+            ServiceManager.Instance.InstGetService<MaxstOpenIDConnectService>().OpenLoginPageAsync();
+#endif
+        }
         public void ShowOIDCProtocolLoginPage(string CodeVerifier, string CodeChallenge)
         {
 #if UNITY_ANDROID
@@ -81,17 +143,63 @@ namespace Maxst.Passport
             Application.OpenURL(GetURL(RedirectURI, CodeVerifier, CodeChallenge));
 #else
             OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.WebRedirectUri, out var RedirectURI);
-            ServiceManager.GetService<MaxstOpenIDConnectService>().OpenLoginPageAsync();
+            ServiceManager.Instance.InstGetService<MaxstOpenIDConnectService>().OpenLoginPageAsync();
 #endif
+        }
+
+        public void OpenUrlLoginPage(PassportConfig config)
+        {
+            switch (config.clientType)
+            {
+                case ClientType.Public:
+                    var PKCEManagerInstance = PKCEManager.GetInstance();
+                    var CodeVerifier = PKCEManagerInstance.GetCodeVerifier();
+                    var CodeChallenge = PKCEManagerInstance.GetCodeChallenge(CodeVerifier);
+                    ShowOIDCProtocolLoginPage(CodeVerifier, CodeChallenge);
+                    break;
+                case ClientType.Confidential:
+                    ShowOIDCProtocolLoginPage();
+                    break;
+                default:
+                    Debug.Log("Client type is not set!");
+                    break;
+            }
+        }
+
+        public string GetConfidentialLoginURL(string RedirectURI)
+        {
+#if UNITY_EDITOR || UNITY_STANDALONE
+            OpenIDConnectArguments.SetValue(OpenIDConnectArgument.WebRedirectUri, RedirectURI);
+# endif
+            var Setting = EnvAdmin.Instance.OpenIDConnectSetting;
+            Setting.TryGetValue(OpenIDConnectSettingKey.ConfidentialLoginUrl, out var LoginUrl);
+
+            OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.ClientID, out var ClientID);
+            OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.ClientSecret, out var ClientSecret);
+
+            this.ClientSecret = ClientSecret;
+
+            OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.ResponseType, out var ResponseType);
+            OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.Scope, out var Scope);
+
+            Setting.TryGetValue(OpenIDConnectSettingKey.LoginAPI, out var LoginAPI);
+
+            var Host = EnvAdmin.Instance.AuthUrlSetting[URLType.API];
+
+            var URL = string.Format(LoginUrl, Host, LoginAPI, ClientID, ResponseType, Scope, RedirectURI, ClientSecret);
+
+            Debug.Log($"[OpenIDConnectAdapter] GetConfidentialLoginURL : {URL}");
+
+            return URL;
         }
 
         public string GetURL(string RedirectURI, string CodeVerifier, string CodeChallenge)
         {
-#if !UNITY_ANDROID && !UNITY_IOS
+#if UNITY_EDITOR || UNITY_STANDALONE
             OpenIDConnectArguments.SetValue(OpenIDConnectArgument.WebRedirectUri, RedirectURI);
 # endif
             var Setting = EnvAdmin.Instance.OpenIDConnectSetting;
-            Setting.TryGetValue(OpenIDConnectSettingKey.LoginUrl, out var LoginUrl);
+            Setting.TryGetValue(OpenIDConnectSettingKey.PublicLoginUrl, out var LoginUrl);
             OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.ClientID, out var ClientID);
             OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.ResponseType, out var ResponseType);
             OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.Scope, out var Scope);
@@ -105,9 +213,35 @@ namespace Maxst.Passport
 
             var URL = string.Format(LoginUrl, Host, LoginAPI, ClientID, ResponseType, Scope, RedirectURI, CodeChallenge, CodeChallengeMethod);
 
-            Debug.Log($"[OpenIDConnectAdapter] : url : {URL}");
+            Debug.Log($"[OpenIDConnectAdapter] GetURL : {URL}");
 
             return URL;
+        }
+        public void OnClientToken(PassportConfig config, Action<TokenStatus, ClientToken> success = null,
+            Action<ErrorCode, Exception> fail = null)
+        {
+            MainThreadDispatcher.StartCoroutine(
+                    TokenRepo.Instance.GetPassportClientToken(
+                config.ApplicationId,
+                config.ApplicationKey,
+                config.GrantType,
+                success,
+                fail
+            ));
+        }
+
+        public void OnClientTokenLegacy(PassportConfig config, Action<TokenStatus, ClientToken> success = null,
+            Action<ErrorCode, Exception> fail = null)
+        {
+            MainThreadDispatcher.StartCoroutine(
+                    TokenRepo.Instance.GetPassportClientTokenWithRealm(
+                config.Realm,
+                config.ApplicationId,
+                config.ApplicationKey,
+                config.GrantType,
+                success,
+                fail
+            ));
         }
 
         public void OnRefreshToken(Action completeAction = null)
@@ -119,7 +253,15 @@ namespace Maxst.Passport
         public void OnLogout(Action completeAction = null)
         {
             Debug.Log("[OpenIDConnectAdapter] OnLogout");
-            SessionLogout(completeAction);
+
+            if (clientType == ClientType.Confidential)
+            {
+                SessionLogout(completeAction, ClientSecret);
+            }
+            else
+            {
+                SessionLogout(completeAction);
+            }
         }
 
         public void ShowSAMLProtocolLoginPage()
@@ -144,32 +286,60 @@ namespace Maxst.Passport
             AcceceToken(code);
         }
 
+        private Action<TokenStatus, Token> GetTokenSuccessCallback()
+        {
+            return (status, token) =>
+            {
+                if (status != TokenStatus.Validate)
+                {
+                    Debug.LogWarning("[OpenIDConnectAdapter] auth fail.. need retry login");
+                    TokenRepo.Instance.Config(null);
+                    return;
+                }
+                Debug.Log($"[OpenIDConnectAdapter] token.idToken : {token.idToken}");
+                Debug.Log($"[OpenIDConnectAdapter] token.accessToken : {token.accessToken}");
+                Debug.Log($"[OpenIDConnectAdapter] token.refreshToken : {token.refreshToken}");
+                IOpenIDConnectListener?.OnSuccess(token, RequestType.ACCECE_TOKEN);
+            };
+        }
+
+        private Action<ErrorCode, Exception> GetTokenFaliCallback()
+        {
+            return (LoginErrorCode, Exception) =>
+            {
+
+                IOpenIDConnectListener?.OnFail(LoginErrorCode, Exception);
+
+            };
+        }
+
         public void AcceceToken(string code)
         {
             MainThreadDispatcher.StartCoroutine(
-                    TokenRepo.Instance.GetPassportToken(
-                        OpenIDConnectArguments, code, CodeVerifier,
-                        (status, token) =>
-                        {
-                            if (status != TokenStatus.Validate)
-                            {
-                                Debug.LogWarning("[OpenIDConnectAdapter] auth fail.. need retry login");
-                                TokenRepo.Instance.Config(null);
-                                return;
-                            }
-                            IOpenIDConnectListener?.OnSuccess(token, RequestType.ACCECE_TOKEN);
-                            Debug.Log($"[OpenIDConnectAdapter] token.idToken : {token.idToken}");
-                            Debug.Log($"[OpenIDConnectAdapter] token.accessToken : {token.accessToken}");
-                            Debug.Log($"[OpenIDConnectAdapter] token.refreshToken : {token.refreshToken}");
-                        },
-                        (LoginErrorCode, Exception) =>
-                        {
-                            IOpenIDConnectListener?.OnFail(LoginErrorCode, Exception);
-                            Debug.Log($"[OpenIDConnectAdapter] LoginErrorCode : {LoginErrorCode}");
-                        }
+                clientType == ClientType.Public ?
+                TokenRepo.Instance.GetPublicPassportToken(
+                        OpenIDConnectArguments, code, CodeVerifier, GetTokenSuccessCallback(), GetTokenFaliCallback(), false
                     )
+                : TokenRepo.Instance.GetConfidentialPassportToken(
+                        OpenIDConnectArguments, code, ClientSecret, GetTokenSuccessCallback(), GetTokenFaliCallback()
+                    )
+            );
+        }
+#if UNITY_EDITOR
+        public void EditorAccessToken(string code)
+        {
+            EditorCoroutineUtility.StartCoroutine(
+                clientType == ClientType.Public ?
+                TokenRepo.Instance.GetPublicPassportToken(
+                        OpenIDConnectArguments, code, CodeVerifier, GetTokenSuccessCallback(), GetTokenFaliCallback()
+                    )
+                : TokenRepo.Instance.GetConfidentialPassportToken(
+                        OpenIDConnectArguments, code, ClientSecret, GetTokenSuccessCallback(), GetTokenFaliCallback()
+                    )
+                , this
                 );
         }
+#endif
         private void RefreshToken(Action complete)
         {
             MainThreadDispatcher.StartCoroutine(
@@ -183,12 +353,13 @@ namespace Maxst.Passport
                                 complete?.Invoke();
                                 return;
                             }
-                            
+
                             if (token == null)
                             {
                                 Debug.Log($"[OpenIDConnectAdapter] Token value does not exist");
                             }
-                            else {
+                            else
+                            {
                                 Debug.Log($"[OpenIDConnectAdapter] OnSuccess RefreshToken idToken : {token.idToken}");
                                 Debug.Log($"[OpenIDConnectAdapter] OnSuccess RefreshToken accessToken : {token.accessToken}");
                                 Debug.Log($"[OpenIDConnectAdapter] OnSuccess RefreshToken refreshToken : {token.refreshToken}");
@@ -206,7 +377,28 @@ namespace Maxst.Passport
                 );
         }
 
-        private void SessionLogout(Action complete)
+        //private Action success = null, System.Action<System.Exception> fail = null
+        private Action GetLogoutSuccessCallback(Action complete)
+        {
+            return () =>
+            {
+                Debug.Log($"[OpenIDConnectAdapter] SessionLogout success");
+                complete?.Invoke();
+                IOpenIDConnectListener?.OnLogout();
+            };
+        }
+
+        private Action<Exception> GetLogoutExceptionCallback(Action complete)
+        {
+            return (Exception) =>
+            {
+                Debug.Log($"[OpenIDConnectAdapter] SessionLogout fail : {Exception}");
+                complete?.Invoke();
+                IOpenIDConnectListener?.OnFail(ErrorCode.LOGOUT, Exception);
+            };
+        }
+
+        private void SessionLogout(Action complete, string ClientSecret = null)
         {
             MainThreadDispatcher.StartCoroutine(
                 TokenRepo.Instance.GetPassportRefreshToken(
@@ -220,19 +412,21 @@ namespace Maxst.Passport
                             return;
                         }
 
-                        TokenRepo.Instance.PassportLogout(
-                        () =>
+                        if (ClientSecret == null)
                         {
-                            Debug.Log($"[OpenIDConnectAdapter] SessionLogout success");
-                            complete?.Invoke();
-                            IOpenIDConnectListener?.OnLogout();
-                        },
-                        (Exception) =>
+                            TokenRepo.Instance.PublicPassportLogout(
+                                GetLogoutSuccessCallback(complete),
+                                GetLogoutExceptionCallback(complete)
+                            );
+                        }
+                        else
                         {
-                            Debug.Log($"[OpenIDConnectAdapter] SessionLogout fail : {Exception}");
-                            complete?.Invoke();
-                            IOpenIDConnectListener?.OnFail(ErrorCode.LOGOUT, Exception);
-                        });
+                            TokenRepo.Instance.ConfidentialPassportLogout(
+                                    ClientSecret,
+                                 GetLogoutSuccessCallback(complete),
+                                 GetLogoutExceptionCallback(complete)
+                             );
+                        }
                     },
                     (Exception) =>
                     {

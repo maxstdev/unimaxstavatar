@@ -1,8 +1,6 @@
-using Maxst.Token;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Maxst.Resource
@@ -10,66 +8,31 @@ namespace Maxst.Resource
     [Serializable]
     public class SaveRecipeExtensions
     {
-        [JsonProperty("saveRecipeString")]
+        [JsonProperty("recipeStr")]
         [SerializeField]
-        public string saveRecipeString;
+        public string recipeStr;
 
-        [JsonProperty("wardrobePaths")]
+        [JsonProperty("itemIds")]
         [SerializeField]
-        public List<WardrobePath> wardrobePaths;
+        public List<long> itemIds;
 
-        [Serializable]
-        public class WardrobePath
+        public void SetSaveRecipeString(string recipeStr)
         {
-            [JsonProperty("slot")]
-            public string slot;
-
-            [JsonProperty("clientId")]
-            public string clientId;
-
-            [JsonProperty("recipe")]
-            public string recipe;
+            this.recipeStr = recipeStr;
+            SetItemId();
         }
 
-        public void SetSaveRecipeString(string saveRecipeString)
+        private void SetItemId()
         {
-            this.saveRecipeString = saveRecipeString;
-        }
-
-        public void SetSlotPath(string clientId, string beforeSaveRecipeString)
-        {
-            wardrobePaths = new List<WardrobePath>();
-            SaveRecipe saveRecipe = JsonUtility.FromJson<SaveRecipe>(saveRecipeString);
-
-            SaveRecipeExtensions beforeSaveRecipe = JsonUtility.FromJson<SaveRecipeExtensions>(beforeSaveRecipeString);
-
-            wardrobePaths.AddRange(saveRecipe.wardrobeSet.Select(wardrobe =>
+            SaveRecipe recipe = JsonUtility.FromJson<SaveRecipe>(this.recipeStr);
+            itemIds = new List<long>();
+            recipe.wardrobeSet.ForEach(each =>
             {
-                string storedClientId = beforeSaveRecipe?.wardrobePaths.FirstOrDefault(beforeWardrobe =>
-                                beforeWardrobe.slot == wardrobe.slot && beforeWardrobe.recipe == wardrobe.recipe)?.clientId;
-
-                var WardrobePath = new WardrobePath();
-                WardrobePath.slot = wardrobe.slot;
-                WardrobePath.recipe = wardrobe.recipe;
-                WardrobePath.clientId = storedClientId == null ? clientId : storedClientId;
-
-                return WardrobePath;
-            }));
-        }
-        public void SetSlotPath(string clientId)
-        {
-            wardrobePaths = new List<WardrobePath>();
-            SaveRecipe saveRecipe = JsonUtility.FromJson<SaveRecipe>(saveRecipeString);
-
-            wardrobePaths.AddRange(saveRecipe.wardrobeSet.Select(wardrobe =>
-            {
-                var WardrobePath = new WardrobePath();
-                WardrobePath.slot = wardrobe.slot;
-                WardrobePath.recipe = wardrobe.recipe;
-                WardrobePath.clientId = clientId;
-
-                return WardrobePath;
-            }));
+                if (long.TryParse(each.recipe, out var id))
+                {
+                    itemIds.Add(id);
+                }
+            });
         }
     }
 }

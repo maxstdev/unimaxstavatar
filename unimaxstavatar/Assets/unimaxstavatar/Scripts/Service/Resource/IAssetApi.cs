@@ -2,39 +2,32 @@ using Maxst.Avatar;
 using Retrofit.Methods;
 using Retrofit.Parameters;
 using System;
+using System.Collections.Generic;
 
 namespace Maxst.Resource
 {
     public interface IAssetApi
     {
-        [Get("{publicPath}")]
-        IObservable<Container> FetchPublicContainer(
-        [Header("Authorization")] string accessToken, [Path("publicPath")] string publicPath);
+        [Get("/asset-integration/assets/avatars")]
+        IObservable<List<AvatarResource>> FetchAvatarResources(
+        [Header("Authorization")] string accessToken,
+        [Query("mainCategory")] string mainCategory,
+        [Query("subCategory")] string subCategory,
+        [Query("os")] string os,
+        [Query("appId")] string appId
+        );
 
-        [Get("{uri}")]
-        IObservable<Contain> FetchContain(
-        [Header("Authorization")] string accessToken, [Path("uri")] string uri);
-        
-        /*
-        [Get("/{clientId}/{appFolderName}/{platform}/")]
-        IObservable<String> FetchAllCategoryContainerMetaList(
-        [Header("Authorization")] string accessToken, [Path("clientId")] string clientId,
-        [Path("appFolderName")] string appFolderName, [Path("platform")] string platform, [Query("type")] string type);
-        */
-        
-        [Get("/{clientId}/{appFolderPrefix}/{category}/")]
-        IObservable<ContainerMeta> FetchCategoryContainerMetaList(
-        [Header("Authorization")] string accessToken, [Path("clientId")] string clientId,
-        [Path("appFolderPrefix")] string appFolderPrefix, [Path("category")] string category, [Query("type")] string type);
+        [Get("/asset-integration/users/avatar/assets")]
+        IObservable<UserAvatar> FetchUserSaveRecipe(
+        [Header("Authorization")] string accessToken,
+        [Query("os")] string os
+        );
 
-        [Get("/{clientId}/{appFolderPrefix}/{category}/")]
-        IObservable<ContainMeta> FetchContainerMeta(
-        [Header("Authorization")] string accessToken, [Path("clientId")] string clientId,
-        [Path("appFolderPrefix")] string appFolderPrefix, [Path("category")] string category, [Query("type")] string type);
-
-        // Need to delete test function
-        [Get("/{custom}/")]
-        IObservable<ContainerMeta> FetchCustomMeta(
-        [Header("Authorization")] string accessToken, [Path("custom")] string custom, [Query("type")] string type);
+        [Headers("Content-Type: application/json")]
+        [Post("/asset-integration/users/avatar/assets")]
+        IObservable<string> PostUserSaveRecipe(
+        [Header("Authorization")] string accessToken,
+        [Body] SaveRecipeExtensions saveRecipeExtension
+        );
     }
 }

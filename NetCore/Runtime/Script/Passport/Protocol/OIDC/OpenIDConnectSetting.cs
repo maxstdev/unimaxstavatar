@@ -6,11 +6,12 @@ namespace Maxst.Settings
     {
         CodeChallengeMethod,
         LoginAPI,
-        LoginUrl,
+        PublicLoginUrl,
+        ConfidentialLoginUrl,
         GrantType
     }
 
-    [CreateAssetMenu(fileName = "OpenIDConnectSetting", menuName = "Packages/MaxSSO/OpenIDConnectSetting", order = 1000)]
+    [CreateAssetMenu(fileName = "OpenIDConnectSetting", menuName = "Packages/Passport/OpenIDConnectSetting", order = 1000)]
     public class OpenIDConnectSetting : ScriptableDictionary<OpenIDConnectSettingKey, string>
     {
 

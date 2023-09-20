@@ -1367,7 +1367,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 482611804587131046, guid: 0d06a543d536ecd45b691923f7149b73, type: 3}
       propertyPath: m_Name
-      value: AvatarDataManager
+      value: AvatarResourceManager
       objectReference: {fileID: 0}
     - target: {fileID: 1880611766041512798, guid: 0d06a543d536ecd45b691923f7149b73, type: 3}
       propertyPath: m_Enabled
