@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Maxst.Settings
 {
-    public class EnvAdmin : Singleton<EnvAdmin>
+    public class EnvAdmin : MaxstUtils.Singleton<EnvAdmin>
     {
         public ReactiveProperty<EnvType> CurrentEnv = new ReactiveProperty<EnvType>(EnvType.Prod);
         public ReactiveProperty<DomainType> CurrentEnvUrl = new ReactiveProperty<DomainType>(DomainType.maxst);

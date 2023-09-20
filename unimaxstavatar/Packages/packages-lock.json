@@ -20,6 +20,14 @@
       "dependencies": {},
       "hash": "b992a061fbf68ff1eb475d0837065b0549ed31ba"
     },
+    "com.maxst.content.resoruces": {
+      "version": "file:../../content-team-resources",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.unity.textmeshpro": "3.0.2"
+      }
+    },
     "com.maxst.passport.core": {
       "version": "file:../../NetCore",
       "depth": 0,
@@ -268,13 +276,6 @@
         "com.unity.modules.ui": "1.0.0",
         "com.unity.modules.imgui": "1.0.0"
       }
-    },
-    "io.colyseus.sdk": {
-      "version": "https://github.com/colyseus/colyseus-unity3d.git#upm",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "c5bf8d6f4abe5401847e92e5b038410658066b2f"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

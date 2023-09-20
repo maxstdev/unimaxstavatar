@@ -23,12 +23,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - baseavatar
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 205e38bfb3b6c6c4ba20c6891905698b
-    m_Address: FACP_00_Eyebrows_01_Recipe
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - baseavatar
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1f292487d7383514f97c491cadfb0442
     m_Address: CapsuleColliderRecipe
     m_ReadOnly: 0

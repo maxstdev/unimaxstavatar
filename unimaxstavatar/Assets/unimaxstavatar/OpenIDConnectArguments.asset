@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 503fc7dee27293741b869fe1f50b6e34, type: 3}
   m_Name: OpenIDConnectArguments
   m_EditorClassIdentifier: 
-  keys: 000000000100000002000000030000000400000005000000
+  keys: 00000000010000000200000003000000060000000500000004000000
   values:
+  - 
   - 
   - code
   - openid

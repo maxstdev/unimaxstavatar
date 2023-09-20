@@ -38,8 +38,6 @@ public enum ExceptionKeyword
 
 public class AvatarAddressableManager : MonoBehaviour
 {
-    private List<UMAWardrobeRecipe> Res = new();
-
     [SerializeField] private List<OverlayDataAsset> OverlayDataAsset = new();
     [SerializeField] private List<UMATextRecipe> UMATextRecipe = new();
     [SerializeField] private List<RaceData> RaceData = new();
@@ -51,190 +49,147 @@ public class AvatarAddressableManager : MonoBehaviour
     [SerializeField] private List<Texture2D> Texture2D = new();
 
     public Subject<List<UMATextRecipe>> addressableloadComplete = new Subject<List<UMATextRecipe>>();
+    public Subject<bool> addressableUpdateComplete = new Subject<bool>();
     private AvatarResourceManager avatarResourceManager;
+
+    private Dictionary<string, string> resAppIdDict = new Dictionary<string, string>();
+
+    Dictionary<string, AsyncOperationHandle<IList<UnityEngine.Object>>> bundleCacheDic = new Dictionary<string, AsyncOperationHandle<IList<UnityEngine.Object>>>();
 
     private void Start()
     {
 #if UMA_ADDRESSABLES
-        /*
-            AsyncInit();
-            AddressableException();
-        */
-        SetAvatarDataManager();
-        var catalogJsonPathList = GetCatalogJsonPathList();
-
-        Addressables.WebRequestOverride += SetHeader;
-        AsyncInit(catalogJsonPathList, true);
         AddressableException();
+        CreateAsync().Forget();
 #else
         addressableloadComplete.OnNext(new List<UMATextRecipe>());
 #endif
     }
 
-    private string GetCatalogJsonPath()
-    {
-        string result = "";
-
-        var o = GameObject.Find("AvatarDataManager");
-        if (o != null)
-        {
-            var avatarResourceManager = o.GetComponent<AvatarResourceManager>();
-            result = avatarResourceManager.GetCatalogJsonPath();
-        }
-        else
-        {
-            ResourceSettingSO resourceSettingSO = ResourceSettingSO.Instance;
-            result = $"{resourceSettingSO.BaseUrl}{resourceSettingSO.Container}{resourceSettingSO.Platform}/{resourceSettingSO.CatalogJsonFileName}{resourceSettingSO.Ext}";
-        }
-        return result;
-    }
-
     private void SetAvatarDataManager()
     {
-        var o = GameObject.Find("AvatarDataManager");
+        var o = GameObject.Find("AvatarResourceManager");
         if (o != null)
         {
             avatarResourceManager = o.GetComponent<AvatarResourceManager>();
         }
     }
 
-    private List<ResourceMeta> GetCatalogJsonPathList()
+    private Dictionary<Category, List<AvatarResource>> GetAvatarResources()
     {
-        return avatarResourceManager.GetCatalogJsonMetaList();
+        return avatarResourceManager.GetAvatarResources();
     }
-    private List<ContainMeta> GetUmaIdList()
+
+    private Dictionary<Category, List<AvatarResource>> GetSaveAvatarResources()
     {
-        return avatarResourceManager.GetUmaIdList();
+        return avatarResourceManager.GetSaveAvatarResources();
+    }
+
+    private Dictionary<Category, List<AvatarResource>> GetPublicResources()
+    {
+        return avatarResourceManager.GetPublicResources();
     }
 
 #if UMA_ADDRESSABLES
-    /*public async UniTask LoadBundle(string bundlePath)
+    private async UniTask CreateAsync()
     {
-        string uri = bundlePath;
-        UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(uri);
-        SetHeader(request);
+        SetAvatarDataManager();
 
-        await request.SendWebRequest();
-
-        AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(request);
-
-        UMAAssetIndexer.Instance.AddFromAssetBundle(bundle);
-        var assets = bundle.LoadAllAssets();
-
-        foreach (var Each in assets)
-        {
-            switch (Each)
-            {
-                case UMAWardrobeRecipe umaWardrobeRecipe:
-                    UMAWardrobeRecipe.Add(umaWardrobeRecipe);
-                    break;
-                case OverlayDataAsset overlayDataAsset:
-                    OverlayDataAsset.Add(overlayDataAsset);
-                    UMAAssetIndexer.Instance.ProcessNewItem(Each, true, true);
-                    break;
-                case UMATextRecipe umaTextRecipe:
-                    UMATextRecipe.Add(umaTextRecipe);
-                    break;
-                case RaceData raceData:
-                    RaceData.Add(raceData);
-                    break;
-                case UmaTPose umaTPose:
-                    UmaTPose.Add(umaTPose);
-                    break;
-                case DynamicUMADnaAsset dynamicUMADnaAsset:
-                    DynamicUMADnaAsset.Add(dynamicUMADnaAsset);
-                    break;
-                case DynamicDNAConverterController dynamicDNAConverterController:
-                    DynamicDNAConverterController.Add(dynamicDNAConverterController);
-                    break;
-                case Texture2D texture2D:
-                    Texture2D.Add(texture2D);
-                    break;
-                default:
-                    SlotData.Add(Each);
-                    UMAAssetIndexer.Instance.ProcessNewItem(Each, true, true);
-                    break;
-            }
-        }
-
-        AddressableLoadComplete();
-    }*/
-
-    private async void AsyncInit(List<ResourceMeta> catalogJsonMetaList, bool isPublicResourceLoad = false)
-    {
-        List<string> keys = new List<string>();
-        var labels = Enum.GetNames(typeof(Avatarlabel));
-
-        Debug.Log($"[AvatarAddressableManager] AsyncInit catalogJsonMetaList : {catalogJsonMetaList.Count}");
-
-        if (catalogJsonMetaList.Count > 0)
-        {
-            var temp = catalogJsonMetaList.Distinct().ToList();
-
-            foreach (var each in temp)
-            {
-                Debug.Log($"[AvatarAddressableManager] catalogJson path : {each.dataUrl}");
-
-                var content = await Addressables.LoadContentCatalogAsync(each.dataUrl).Task;
-                if (content != null) keys.AddRange(labels.Where(s => content.Keys.Contains(s)).ToList());
-                //if (content != null) keys.AddRange(content.Keys.Select(s => s.ToString()));
-            }
-        }
-
-        if (isPublicResourceLoad)
-        {
-            var catalogJsonPath = GetCatalogJsonPath();
-            var publicContent = await Addressables.LoadContentCatalogAsync(catalogJsonPath).Task;
-
-            if (publicContent != null) keys.AddRange(labels.Where(s => publicContent.Keys.Contains(s)).ToList());
-            //if (publicContent != null) keys.AddRange(publicContent.Keys.Select(s => s.ToString()));
-        }
-
-        //UMAAssetIndexer.Instance.SetMaxstUmaIdList(GetUmaIdList());
-
-        if (keys.Count > 0)
-        {
-            var recipeOp = UMAAssetIndexer.Instance.LoadLabelList(keys, true);
-            recipeOp.Completed += (obj) =>
-            {
-                Debug.Log($"error obgj : {obj}");
-                Recipes_Loaded(obj);
-            };
-
-            await recipeOp.Task;
-        }
-    }
-
-    private async void AsyncInit()
-    {
-        List<string> keys = new List<string>();
-
-        var catalogJsonPath = GetCatalogJsonPath();
-        //Debug.Log($"catalogJsonPath : {catalogJsonPath}");
+        var avatarResources = GetAvatarResources();
+        var saveAvatarResources = GetSaveAvatarResources();
+        var publicResources = GetPublicResources();
+        var avatrarRes = SetAvatarRseources(avatarResources, saveAvatarResources, publicResources);
 
         Addressables.WebRequestOverride += SetHeader;
+        await AsyncInitTask(avatrarRes);
 
-        var content = await Addressables.LoadContentCatalogAsync(catalogJsonPath).Task;
-        //var content = await Addressables.LoadContentCatalogAsync(catalogJsonPath, true).Task;
+        AddressableLoadComplete();
+    }
 
-        keys.AddRange(content.Keys.Select(s => s.ToString()));
+    private List<AvatarResource> SetAvatarRseources(params Dictionary<Category, List<AvatarResource>>[] dicts)
+    {
+        var result = new List<AvatarResource>();
+        foreach (var dict in dicts)
+        {
+            if (dict.Count > 0)
+            {
+                foreach (var each in dict.Values)
+                {
+                    foreach (var item in each)
+                    {
+                        result.Add(item);
+                    }
+                }
+            }
+        }
+        return result.Distinct().ToList();
+    }
 
-        var recipeOp = UMAAssetIndexer.Instance.LoadLabelList(keys, true);
+    private async UniTask AsyncInitTask(List<AvatarResource> resources)
+    {
+        var completionSource = new UniTaskCompletionSource();
+
+        Dictionary<string, string> jsonpathdic = new();
+
+        resources.ForEach(each =>
+            each.resources.ForEach(res =>
+            {
+                jsonpathdic.Add(each.id.ToString(), res.catalogDownloadUri.uri);
+            })
+        );
+
+        foreach (var each in jsonpathdic)
+        {
+            UMAAssetIndexer.Instance.changeAddressableName = each.Key;
+
+            List<string> keys = new List<string>();
+
+            var content = await Addressables.LoadContentCatalogAsync(each.Value, true).Task;
+
+            keys.AddRange(content.Keys.Select(s => s.ToString()));
+
+            await foreach (var _ in LocationLoad(each.Value, keys))
+            {
+
+            }
+        }
+
+        completionSource.TrySetResult();
+    }
+
+    private async IAsyncEnumerable<AsyncOperationHandle<IList<UnityEngine.Object>>> LocationLoad(string path, IEnumerable<object> Keys)
+    {
+        var locations = Addressables.LoadResourceLocationsAsync(Keys, Addressables.MergeMode.Union);
+        await locations.Task;
+
+        var containLocationKey = locations.Result.Select((location) => location.PrimaryKey).Where((loc) => Keys.Contains(loc));
+
+        var recipeOp = UMAAssetIndexer.Instance.LoadLabelList(containLocationKey.ToList<string>(), true);
+        await recipeOp.Task;
+
+        if (recipeOp.Result != null)
+        {
+            bundleCacheDic.Add(path, recipeOp);
+        }
+
         recipeOp.Completed += (obj) =>
         {
-            Recipes_Loaded(obj);
+            Recipes_Loaded(obj.Result, path);
         };
 
-        await recipeOp.Task;
+        yield return recipeOp;
     }
 
-    public void TestButtonClick(int i)
+    public async UniTask UpdateCatalogChecked()
     {
-        UpdateCatalogChecked();
+        var updated = await UpdateCatalog();
+        addressableUpdateComplete.OnNext(updated);
     }
 
-    private async void UpdateCatalogChecked()
+    private async UniTask<bool> UpdateCatalog()
     {
+        var completionSource = new UniTaskCompletionSource();
+
         List<string> updateCatalogPaths = new List<string>();
 
         AsyncOperationHandle<List<string>> checkForUpdateHandle = Addressables.CheckForCatalogUpdates();
@@ -245,15 +200,42 @@ public class AvatarAddressableManager : MonoBehaviour
 
         await checkForUpdateHandle.Task;
 
-        List<string> keys = new List<string>();
-
         if (updateCatalogPaths.Count > 0)
         {
             foreach (var path in updateCatalogPaths)
             {
-                Debug.Log(path);
+                foreach (var cache in bundleCacheDic)
+                {
+                    if (path.Equals(cache.Key))
+                    {
+                        foreach (var item in cache.Value.Result)
+                        {
+                            UMAAssetIndexer.Instance.RemoveRecipe(item);
+                        }
+                        UMAAssetIndexer.Instance.Unload(cache.Value);
+
+                        break;
+                    }
+                }
+                bundleCacheDic.Remove(path);
+            }
+
+            var update = await Addressables.UpdateCatalogs(updateCatalogPaths).Task;
+
+            foreach (var up in update)
+            {
+                await foreach (var _ in LocationLoad(up.LocatorId, up.Keys))
+                {
+
+                }
             }
         }
+        else
+        {
+            return false;
+        }
+
+        return completionSource.TrySetResult();
     }
     private void Recipes_Loaded(AsyncOperationHandle<IList<UnityEngine.Object>> obj)
     {
@@ -308,14 +290,69 @@ public class AvatarAddressableManager : MonoBehaviour
 
         Debug.Log($"Recipes_Loaded {obj.Result.Count}");
 
-        //var RaceName = RaceData[Random.Range(0, RaceData.Count)].raceName;
-        //Debug.Log($"[AddressablesManager] Load Avatar RaceName : {RaceName}");
-
-        //Res = UMAWardrobeRecipe
-        //    .Where(item => item.compatibleRaces.Any(compatibleRace => compatibleRace.Equals(RaceName)))
-        //    .ToList();
-
         AddressableLoadComplete();
+    }
+
+    private void Recipes_Loaded(IList<UnityEngine.Object> obj, string path)
+    {
+        var uniqueObject = new HashSet<UnityEngine.Object>();
+
+        if (obj == null)
+        {
+            return;
+        }
+
+        foreach (var ob in obj)
+        {
+            if (!uniqueObject.Contains(ob))
+            {
+                uniqueObject.Add(ob);
+            }
+        }
+
+        foreach (var Each in uniqueObject)
+        {
+            if (Each != null && !Each.name.ToLower().Contains(ExceptionKeyword.placeholder.ToString()))
+            {
+                switch (Each)
+                {
+                    case UMAWardrobeRecipe umaWardrobeRecipe:
+                        UMAWardrobeRecipe.Add(umaWardrobeRecipe);
+                        break;
+                    case OverlayDataAsset overlayDataAsset:
+                        OverlayDataAsset.Add(overlayDataAsset);
+                        UMAAssetIndexer.Instance.ProcessNewItem(Each, true, true);
+                        break;
+                    case UMATextRecipe umaTextRecipe:
+                        UMATextRecipe.Add(umaTextRecipe);
+                        break;
+                    case RaceData raceData:
+                        RaceData.Add(raceData);
+                        break;
+                    case UmaTPose umaTPose:
+                        UmaTPose.Add(umaTPose);
+                        break;
+                    case DynamicUMADnaAsset dynamicUMADnaAsset:
+                        DynamicUMADnaAsset.Add(dynamicUMADnaAsset);
+                        break;
+                    case DynamicDNAConverterController dynamicDNAConverterController:
+                        DynamicDNAConverterController.Add(dynamicDNAConverterController);
+                        break;
+                    case Texture2D texture2D:
+                        Texture2D.Add(texture2D);
+                        break;
+                    case SlotDataAsset slotdata:
+                        SlotData.Add(slotdata);
+                        var temp = path.Split('/');
+                        if (temp.Length >= 4) resAppIdDict[slotdata.slotName] = path.Split('/')[4];
+
+                        UMAAssetIndexer.Instance.ProcessNewItem(Each, true, true);
+                        break;
+                }
+            }
+        }
+        Debug.Log($"Recipes_Loaded {obj.Count}");
+
     }
 
     private void AddressableLoadComplete()
@@ -327,7 +364,15 @@ public class AvatarAddressableManager : MonoBehaviour
             //recipe.Load(SlotData[0]);
             if (!defaultWardrobe.ContainsKey(recipe.wardrobeSlot))
             {
-                defaultWardrobe.Add(recipe.wardrobeSlot, recipe);
+                var checkId = resAppIdDict[recipe.name];
+                foreach (var id in avatarResourceManager.GetVisibleResAppIds())
+                {
+                    if (checkId.Equals(id))
+                    {
+                        defaultWardrobe.Add(recipe.wardrobeSlot, recipe);
+                        break;
+                    }
+                }
             }
         }
 
@@ -349,6 +394,11 @@ public class AvatarAddressableManager : MonoBehaviour
         {
             //Debug.Log(exception);
         };
+    }
+
+    public Dictionary<string, string> GetResAppIdDict()
+    {
+        return resAppIdDict;
     }
 #endif
 }

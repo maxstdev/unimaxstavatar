@@ -7,6 +7,7 @@ namespace Maxst.Avatar
 {
     public class AssetAreaData
     {
+        public string resId;
         public Sprite thumbnail;
         public string slotName;
         public string recipeString;
@@ -74,16 +75,23 @@ namespace Maxst.Avatar
         {
             var assetdatas = new List<AssetAreaData>();
 
+            currentRaceRecipes = UMAAssetIndexer.Instance.GetRecipes(currentRacename);
             if (currentRaceRecipes.ContainsKey(wardrobeslotName))
             {
                 currentSlotList = new List<UMATextRecipe>(currentRaceRecipes[wardrobeslotName]);
 
                 foreach (var slot in currentSlotList)
                 {
+                    string resId = slot.name;
                     string slotname = slot.DisplayValue != "" ? slot.DisplayValue : slot.name;
                     Sprite slotThumb = slot.GetWardrobeRecipeThumbFor(currentRacename);
 
-                    assetdatas.Add(new AssetAreaData { slotName = slotname, thumbnail = slotThumb, recipeString = slot.recipeString });
+                    assetdatas.Add(new AssetAreaData { 
+                        resId = resId, 
+                        slotName = slotname, 
+                        thumbnail = slotThumb, 
+                        recipeString = slot.recipeString 
+                    });
                 }
             }
 

@@ -1,6 +1,6 @@
 {
   "name": "com.maxst.passport.core",
-  "version": "0.1.12",
+  "version": "0.1.18",
   "displayName": "Unity Passport Core",
   "description": "This is Passport of the source",
   "unity": "2021.3",
@@ -41,5 +41,13 @@
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",
     "com.unity.textmeshpro": "3.0.2"
-  }
+  },
+  "samples":
+    [
+        {
+            "displayName": "UniPassport",  
+            "description": "Test Script",  
+            "path": "Samples~/" 
+        }
+    ]
 }

@@ -1,18 +1,24 @@
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
-namespace Maxst.Resource
+namespace Maxst.Avatar
 {
     [Serializable]
     public class Resource
     {
-        [JsonProperty("type")]
-        public string type;
+        [JsonProperty("os")]
+        public string os;
 
-        [JsonProperty("name")]
-        public string name;
+        [JsonProperty("catalogUri")]
+        public string catalogUri;
 
-        [JsonProperty("uri")]
-        public string uri;
+        [JsonProperty("hashUri")]
+        public string hashUri;
+
+        [JsonProperty("bundleUris")]
+        public List<string> bundleUris;
+
+        public CatalogDownLoadUri catalogDownloadUri;
     }
 }

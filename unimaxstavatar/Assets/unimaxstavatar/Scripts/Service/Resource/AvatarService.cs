@@ -3,6 +3,7 @@ using Retrofit;
 using Retrofit.HttpImpl;
 using Retrofit.Parameters;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -49,29 +50,22 @@ namespace Maxst.Resource
             return httpImpl;
         }
 
-        public IObservable<Container> FetchPublicContainer([Retrofit.Parameters.Header("Authorization")] string accessToken, string publicPath)
+        public IObservable<List<AvatarResource>> FetchAvatarResources([Retrofit.Parameters.Header("Authorization")] string accessToken, [Query("mainCategory")] string mainCategory, [Query("subCategory")] string subCategory, [Query("os")] string os, [Query("appId")] string appId)
         {
-            return SendRequest<Container>(MethodBase.GetCurrentMethod(), accessToken, publicPath) as IObservable<Container>;
+             return SendRequest<List<AvatarResource>>(MethodBase.GetCurrentMethod(), accessToken, mainCategory, subCategory, os, appId) as IObservable<List<AvatarResource>>;
         }
 
-        public IObservable<Contain> FetchContain([Retrofit.Parameters.Header("Authorization")] string accessToken, string uri)
+        public IObservable<UserAvatar> FetchUserSaveRecipe(
+            [Retrofit.Parameters.Header("Authorization")] string accessToken,
+            [Query("os")] string os
+        )
         {
-            return SendRequest<Contain>(MethodBase.GetCurrentMethod(), accessToken, uri) as IObservable<Contain>;
+            return SendRequest<UserAvatar>(MethodBase.GetCurrentMethod(), accessToken, os) as IObservable<UserAvatar>;
         }
 
-        public IObservable<ContainMeta> FetchContainerMeta([Retrofit.Parameters.Header("Authorization")] string accessToken, [Path("clientId")] string clientId, [Path("appFolderPrefix")] string appFolderPrefix, [Path("category")] string category, [Query("type")] string type)
+        public IObservable<string> PostUserSaveRecipe([Retrofit.Parameters.Header("Authorization")] string accessToken, [Body] SaveRecipeExtensions saveRecipeExtension)
         {
-            return SendRequest<ContainMeta>(MethodBase.GetCurrentMethod(), accessToken, clientId, appFolderPrefix, category, type) as IObservable<ContainMeta>; ;
-        }
-
-        public IObservable<ContainerMeta> FetchCategoryContainerMetaList([Retrofit.Parameters.Header("Authorization")] string accessToken, [Path("clientId")] string clientId, [Path("appFolderPrefix")] string appFolderPrefix, [Path("category")] string category, [Query("type")] string type)
-        {
-            return SendRequest<ContainerMeta>(MethodBase.GetCurrentMethod(), accessToken, clientId, appFolderPrefix, category, type) as IObservable<ContainerMeta>; 
-        }
-
-        public IObservable<ContainerMeta> FetchCustomMeta([Retrofit.Parameters.Header("Authorization")] string accessToken, [Path("custom")] string custom, [Query("type")] string type)
-        {
-            return SendRequest<ContainerMeta>(MethodBase.GetCurrentMethod(), accessToken, custom, type) as IObservable<ContainerMeta>;
+            return SendRequest<string>(MethodBase.GetCurrentMethod(), accessToken, saveRecipeExtension) as IObservable<string>;
         }
     }
 }

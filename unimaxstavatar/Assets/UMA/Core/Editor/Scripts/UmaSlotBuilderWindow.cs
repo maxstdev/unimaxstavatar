@@ -8,9 +8,6 @@ namespace UMA.Editors
 {
     public class UmaSlotBuilderWindow : EditorWindow
     {
-#if MAXST_SLOT_NAME
-        private string clientId = "";
-#endif
         /// <summary>
 		/// This class is pretty dumb. It exists solely because "string" has no default constructor, so can't be created using reflection.
 		/// </summary>
@@ -95,11 +92,7 @@ namespace UMA.Editors
             {
                 return slotName.Substring(index + 1);
             }
-#if MAXST_SLOT_NAME
-            return clientId + "_" + slotName;
-#else
             return slotName;
-#endif
         }
 
         public void EnforceFolder(ref UnityEngine.Object folderObject)
@@ -338,11 +331,8 @@ namespace UMA.Editors
         private OverlayDataAsset CreateOverlay(string path, SlotDataAsset sd)
         {
             OverlayDataAsset asset = ScriptableObject.CreateInstance<OverlayDataAsset>();
-#if MAXST_SLOT_NAME
-            asset.overlayName = clientId + "_" + slotName + "_Overlay";
-#else
+
             asset.overlayName = slotName + "_Overlay";
-#endif
             asset.material = sd.material;
             AssetDatabase.CreateAsset(asset, path);
             AssetDatabase.SaveAssets();

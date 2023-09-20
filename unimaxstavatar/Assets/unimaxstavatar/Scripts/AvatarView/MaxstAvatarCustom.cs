@@ -1,6 +1,6 @@
 using Castle.Core.Internal;
-using Maxst.Passport;
 using Maxst.Resource;
+using Maxst.Settings;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,13 +19,12 @@ namespace Maxst.Avatar
 
     public class MaxstAvatarCustom : InjectorBehaviour
     {
-        public const string PREFS_MAXST_AVATAR_KEY = "prefs_maxst_avatar_key";
-
         [DI(DIScope.singleton)] protected AvatarCustomViewModel avatarCustomViewModel { get; }
 
         private UMAAssetData assetData;
         private UndoRedoManager undoRedoManager;
 
+        [SerializeField] private OpenIDConnectArguments openIDConnectArguments;
         [SerializeField] private GameObject ResultGradientView;
         [SerializeField] private GameObject DefaultGradientView;
 
@@ -53,8 +52,12 @@ namespace Maxst.Avatar
 
         private ViewType beforeViewType = ViewType.None;
 
+        private AvatarResourceManager avatarResourceManager;
+
         void Awake()
         {
+            SetAvatarDataManager();
+
             addressableloader = GetComponent<AvatarAddressableManager>();
             addressableloader.addressableloadComplete
                 .Subscribe(list =>
@@ -62,25 +65,40 @@ namespace Maxst.Avatar
                     defaultTextRecipe.AddRange(list);
                     InitAvatarCustom();
                 });
+            addressableloader.addressableUpdateComplete
+                .Subscribe(updatded =>
+                {
+                    if (updatded)
+                    {
+                        Avatar.ClearSlots();
+                        foreach (var wear in wearingRecipeList)
+                        {
+                            Avatar.SetSlot(wear);
+                        }
+                        Avatar.BuildCharacter(true);
+                        //categoryAreaUI.categoryWardrobeslot.SetValueAndForceNotify(categoryAreaUI.categoryWardrobeslot.Value);
+                    }
+                    else
+                    {
+
+                    }
+                });
         }
 
-        private string GetSaveRecipe()
+        private void SetAvatarDataManager()
         {
-            var o = GameObject.Find("AvatarDataManager");
+            var o = GameObject.Find("AvatarResourceManager");
             if (o != null)
             {
-                var avatarDataManager = o.GetComponent<AvatarResourceManager>();
-                return avatarDataManager.GetSaveRecipe();
+                avatarResourceManager = o.GetComponent<AvatarResourceManager>();
             }
-            return null;
         }
-        private string GetSaveRecipeExtensions()
+
+        private UserAvatar GetUserAvatar()
         {
-            var o = GameObject.Find("AvatarDataManager");
-            if (o != null)
+            if (avatarResourceManager != null)
             {
-                var avatarDataManager = o.GetComponent<AvatarResourceManager>();
-                return avatarDataManager.GetSaveRecipeExtensions();
+                return avatarResourceManager.GetUserAvatar();
             }
             return null;
         }
@@ -88,12 +106,12 @@ namespace Maxst.Avatar
         public void InitAvatarCustom()
         {
             SetDefaultAvatar();
-#if MAXST_SAVE_RECIPE_EXTENSIONS
-            var loadRecipeString = GetSaveRecipeExtensions().IsNullOrEmpty() ? null : JsonUtility.FromJson<SaveRecipeExtensions>(GetSaveRecipeExtensions()).saveRecipeString;
-            Avatar.SetDefaultTextRecipe(defaultTextRecipe, loadRecipeString);
-#else
-            Avatar.SetDefaultTextRecipe(defaultTextRecipe, GetSaveRecipe());
-#endif
+
+            var temp = GetUserAvatar()?.recipeStr;
+            var recipeStr = temp.IsNullOrEmpty() ? null : temp;
+
+            Avatar.SetDefaultTextRecipe(defaultTextRecipe, recipeStr);
+
             assetData = new UMAAssetData();
             undoRedoManager = new UndoRedoManager();
             undoRedoManager.SetExecuteCommandAction(() =>
@@ -116,7 +134,7 @@ namespace Maxst.Avatar
                     //ColorUiInitColor(value);
                     GetAvatarWardrobeSlotRecipe(value);
 
-                    LoadScrollerDataFromAsset(value);
+                    LoadScrollerDataFromAsset(value, avatarResourceManager.GetVisibleResAppIds());
 
                 })
                 .AddTo(this);
@@ -306,64 +324,27 @@ namespace Maxst.Avatar
                 Debug.Log("[MaxstAvatarCustom] End Scene!!");
             }
         }
-
         public void SaveRecipeExtensions()
         {
             if (Avatar != null)
             {
                 var saveRecipeString = Avatar.MaxstDoSave(false);
-                var beforeSeveRecipeString = GetSaveRecipeExtensions();
 
-                var clientId = TokenRepo.Instance.GetJwtTokenBody().azp;
                 var saveRecipeExtensions = new SaveRecipeExtensions();
                 saveRecipeExtensions.SetSaveRecipeString(saveRecipeString);
 
-                if (!saveRecipeString.IsNullOrEmpty() && !beforeSeveRecipeString.IsNullOrEmpty())
+                if (avatarResourceManager != null)
                 {
-                    saveRecipeExtensions.SetSlotPath(clientId, beforeSeveRecipeString);
-                }
-                else
-                {
-                    saveRecipeExtensions.SetSlotPath(clientId);
-                }
+                    avatarResourceManager.AvatarSaveExtensionsDataListener(saveRecipeExtensions);
 
-                var saveRecipeExtensionString = JsonUtility.ToJson(saveRecipeExtensions, true);
-
-                var o = GameObject.Find("AvatarDataManager");
-                if (o != null)
-                {
-                    var avatarDataManager = o.GetComponent<AvatarResourceManager>();
-                    avatarDataManager.AvatarSaveExtensionsDataListener(saveRecipeExtensionString);
-
-                    Debug.Log($"[MaxstAvatarCustom] save_recipe_extensions : {saveRecipeExtensionString}");
-                }
-            }
-        }
-
-        public void SaveRecipe()
-        {
-            if (Avatar != null)
-            {
-                var saveRecipeString = Avatar.MaxstDoSave(false);
-
-                var o = GameObject.Find("AvatarDataManager");
-                if (o != null)
-                {
-                    var avatarDataManager = o.GetComponent<AvatarResourceManager>();
-                    avatarDataManager.AvatarSaveDataListener(saveRecipeString);
-
-                    Debug.Log($"[MaxstAvatarCustom] saveRecipeString : {saveRecipeString}");
+                    Debug.Log($"[MaxstAvatarCustom] save_recipe_extensions : {saveRecipeExtensions}");
                 }
             }
         }
 
         private void NextScene()
         {
-#if MAXST_SAVE_RECIPE_EXTENSIONS
             SaveRecipeExtensions();
-#else
-            SaveRecipe();
-#endif
             Debug.Log("[MaxstAvatarCustom] Next Scene!!");
         }
 
@@ -422,11 +403,30 @@ namespace Maxst.Avatar
             undoRedoManager.Redo();
         }
 
-        private void LoadScrollerDataFromAsset(string value)
+        private async void LoadScrollerDataFromAsset(string value, List<string> showResAppIds)
         {
-            var list = assetData.GetAssetData(value);
+            await addressableloader.UpdateCatalogChecked();
+
+            var temp = assetData.GetAssetData(value);
+            var list = new List<AssetAreaData>();
+            var resDict = addressableloader.GetResAppIdDict();
+
+            foreach (var appId in showResAppIds)
+            {
+                foreach (var assetAreaData in temp)
+                {
+                    resDict.TryGetValue(assetAreaData.resId, out var checkAppId);
+
+                    if (appId.Equals(checkAppId))
+                    {
+                        list.Add(assetAreaData);
+                    }
+                }
+            }
 
             assetAreaUI.DeleteAllItem();
+
+            var category = (Category)Enum.Parse(typeof(Category), value);
 
             list.ForEach(slot =>
             {
@@ -449,7 +449,7 @@ namespace Maxst.Avatar
 
             if (!string.IsNullOrEmpty(slotValue))
             {
-                LoadScrollerDataFromAsset(slotValue);
+                LoadScrollerDataFromAsset(slotValue, avatarResourceManager.GetVisibleResAppIds());
             }
 
             RefreshBtnStateUI();
@@ -457,7 +457,7 @@ namespace Maxst.Avatar
 
         private void UndoSelectUI()
         {
-            LoadScrollerDataFromAsset(categoryAreaUI.categoryWardrobeslot.Value);
+            LoadScrollerDataFromAsset(categoryAreaUI.categoryWardrobeslot.Value, avatarResourceManager.GetVisibleResAppIds());
             UndoBtnStateUI();
         }
 
