@@ -45,7 +45,6 @@ namespace Maxst.Passport
         private void GetClientToken()
         {
             var passportConfig = SampleConfig.Instance;
-            //OpenIdConnectAdapter.OnClientTokenLegacy(passportConfig);
             OpenIdConnectAdapter.OnClientToken(passportConfig);
         }
 

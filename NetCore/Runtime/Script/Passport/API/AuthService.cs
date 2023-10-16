@@ -8,7 +8,9 @@ using Maxst.Settings;
 
 namespace Maxst.Passport
 {
+
     public class AuthService : RestAdapter, IAuthApi
+    
     {
         private static AuthService _instance;
         public static AuthService Instance
@@ -46,14 +48,15 @@ namespace Maxst.Passport
 
         private string GetUrl()
         {
-            return EnvAdmin.Instance.AuthUrlSetting[URLType.API];
+            //var prefix = EnvAdmin.Instance.CurrentEnv.Value == EnvType.Alpha ? "/api" : "";
+            return $"{EnvAdmin.Instance.AuthUrlSetting[URLType.API]}";
         }
 
         public IObservable<CredentialsToken> ConfidentialPassportToken(
-            [Field("client_id")] string client_id,
-            [Field("client_secret")] string client_secret,
-            [Field("grant_type")] string grant_type,
-            [Field("redirect_uri")] string redirect_uri,
+            [Field("client_id")] string client_id, 
+            [Field("client_secret")] string client_secret, 
+            [Field("grant_type")] string grant_type, 
+            [Field("redirect_uri")] string redirect_uri, 
             [Field("code")] string code
             )
         {
@@ -61,11 +64,11 @@ namespace Maxst.Passport
                 client_id, client_secret, grant_type, redirect_uri, code) as IObservable<CredentialsToken>;
         }
 
-        public IObservable<CredentialsToken> PublicPassportToken(
-            [Field("client_id")] string client_id,
-            [Field("code_verifier")] string code_verifier,
-            [Field("grant_type")] string grant_type,
-            [Field("redirect_uri")] string redirect_uri,
+        public IObservable<CredentialsToken> PassportToken(
+            [Field("client_id")] string client_id, 
+            [Field("code_verifier")] string code_verifier, 
+            [Field("grant_type")] string grant_type, 
+            [Field("redirect_uri")] string redirect_uri, 
             [Field("code")] string code
             )
         {
@@ -83,43 +86,28 @@ namespace Maxst.Passport
                 client_id, grant_type, refresh_token) as IObservable<CredentialsToken>;
         }
 
-        public IObservable<string> PublicPassportLogout(
-            [Retrofit.Parameters.Header("Authorization")] string accessToken,
+        public IObservable<CredentialsToken> PassportConfidentialRefreshToken(
             [Field("client_id")] string client_id, 
-            [Field("refresh_token")] string refresh_token, 
-            [Field("id_token")] string id_token
-            )
-        {
-            return SendRequest<string>(MethodBase.GetCurrentMethod(),
-            accessToken, client_id, refresh_token, id_token) as IObservable<string>;
-        }
-        
-        public IObservable<string> ConfidentialPassportLogout(
-            [Retrofit.Parameters.Header("Authorization")] string accessToken,
-            [Field("client_id")] string client_id, 
+            [Field("grant_type")] string grant_type, 
             [Field("refresh_token")] string refresh_token, 
             [Field("client_secret")] string client_secret
+        )
+        {
+            return SendRequest<CredentialsToken>(MethodBase.GetCurrentMethod(),
+                client_id, grant_type, refresh_token, client_secret) as IObservable<CredentialsToken>;
+        }
+
+        public IObservable<string> PassportLogout(
+            [Retrofit.Parameters.Header("Authorization")] string accessToken,
+            [Field("client_id")] string client_id, 
+            [Field("id_token_hint")] string id_token_hint
             )
         {
             return SendRequest<string>(MethodBase.GetCurrentMethod(),
-            accessToken, client_id, refresh_token, client_secret) as IObservable<string>;
+            accessToken, client_id, id_token_hint) as IObservable<string>;
         }
 
-        public IObservable<ClientToken> PassportClientTokenWithRealm([Path("realm")] string realm, [Field("client_id")] string applicationId, [Field("client_secret")] string applicationKey, [Field("grant_type")] string grantType)
-        {
-            return SendRequest<ClientToken>(MethodBase.GetCurrentMethod(),
-            realm, applicationId, applicationKey, grantType) as IObservable<ClientToken>;
-        }
-
-        [Obsolete]
         public IObservable<ClientToken> PassportClientToken([Field("client_id")] string applicationId, [Field("client_secret")] string applicationKey, [Field("grant_type")] string grantType)
-        {
-            return SendRequest<ClientToken>(MethodBase.GetCurrentMethod(),
-            applicationId, applicationKey, grantType) as IObservable<ClientToken>;
-        }
-
-        [Obsolete]
-        public IObservable<ClientToken> AlphaPassportClientToken([Field("client_id")] string applicationId, [Field("client_secret")] string applicationKey, [Field("grant_type")] string grantType)
         {
             return SendRequest<ClientToken>(MethodBase.GetCurrentMethod(),
             applicationId, applicationKey, grantType) as IObservable<ClientToken>;

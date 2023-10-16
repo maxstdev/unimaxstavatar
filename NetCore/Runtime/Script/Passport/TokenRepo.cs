@@ -13,10 +13,10 @@ namespace Maxst.Passport
         public string idToken;
         public string accessToken;
         public string refreshToken;
+        public int refreshExpiresIn;
 
         public TokenDictionary accessTokenDictionary;
         public TokenDictionary idTokenDictionary;
-        public TokenDictionary refreshTokenDictionary;
     }
 
     public enum TokenStatus
@@ -36,6 +36,7 @@ namespace Maxst.Passport
         private const string IdTokenKey = "Passport_IdToken";
         private const string AccessTokenKey = "Passport_AccessToken";
         private const string RefreshTokenKey = "Passport_RefreshToken";
+        private const string RefreshExpiresIn = "Passport_RefreshExpiresIn";
 
         private const string GrantType = "refresh_token";
 
@@ -50,9 +51,14 @@ namespace Maxst.Passport
         private string BearerAccessToken => string.IsNullOrEmpty(token?.accessToken) ? "" : "Bearer " + token.accessToken;
         private string RefreshToken => token?.refreshToken ?? "";
 
+        public ReactiveProperty<Token> tokenReactiveProperty = new(null);
+        public ReactiveProperty<ClientToken> clientTokenReactiveProperty = new(null);
+
         public ReactiveProperty<TokenStatus> tokenStatus = new(TokenStatus.Expired);
         public ReactiveProperty<TokenStatus> clientTokenStatus = new(TokenStatus.Expired);
         public string ClientID { get; set; } = string.Empty;
+        public string ClientSecret { get; set; } = string.Empty;
+        public ClientType ClientType { get; set; } = ClientType.Public;
 
 
         [RuntimeInitializeOnLoadMethod]
@@ -79,7 +85,9 @@ namespace Maxst.Passport
         public void ClientTokenConfig(ClientToken token)
         {
             this.clientToken = token;
+            
             StoreClientToken(token);
+            
             if (token != null)
             {
                 clientTokenDictionary = new TokenDictionary(BodyDecodeDictionary(token.access_token, DecodingType.BASE64_URL_SAFE));
@@ -98,16 +106,16 @@ namespace Maxst.Passport
         public void Config(Token token)
         {
             this.token = token;
+            
             StoreToken(token);
+
             if (token != null)
             {
                 token.accessTokenDictionary = new TokenDictionary(BodyDecodeDictionary(token.accessToken, DecodingType.BASE64_URL_SAFE));
                 token.idTokenDictionary = new TokenDictionary(BodyDecodeDictionary(token.idToken, DecodingType.BASE64_URL_SAFE));
-                token.refreshTokenDictionary = new TokenDictionary(BodyDecodeDictionary(token.refreshToken, DecodingType.BASE64_URL_SAFE));
                 
                 long exp = token.accessTokenDictionary.GetTypedValue<long>(JwtTokenConstants.exp);
-                exp = exp > DEFAULT_EFFECTIVE_TIME ?
-                    exp : CurrentTimeSeconds() + DEFAULT_EFFECTIVE_TIME;
+                exp = exp > DEFAULT_EFFECTIVE_TIME ? exp : CurrentTimeSeconds() + DEFAULT_EFFECTIVE_TIME;
 
                 //force test code
                 //jwtTokenBody.exp = CurrentTimeSeconds() + ESTIMATED_EXPIRATION_TIME + 5;
@@ -133,7 +141,6 @@ namespace Maxst.Passport
             return clientTokenStatus.Value != TokenStatus.Renewing;
         }
 
-        [Obsolete]
         public IEnumerator GetPassportClientToken(
             string applicationId, string applicationKey, string grantType,
             Action<TokenStatus, ClientToken> callback = null,
@@ -150,22 +157,7 @@ namespace Maxst.Passport
             callback?.Invoke(clientTokenStatus.Value, clientToken);
         }
 
-        public IEnumerator GetPassportClientTokenWithRealm(
-            string realm, string applicationId, string applicationKey, string grantType,
-            Action<TokenStatus, ClientToken> callback = null,
-            Action<ErrorCode, Exception> LoginFailAction = null,
-            bool isForcedRefresh = true
-            )
-        {
-            if (isForcedRefresh || (clientToken == null || ClientIsTokenExpired()))
-            {
-                yield return new WaitUntil(() => IsClientTokenNotRenewing());
-                yield return FetchPassportClientTokenWithRealm(realm, applicationId, applicationKey, grantType, LoginFailAction);
-            }
-            callback?.Invoke(clientTokenStatus.Value, clientToken);
-        }
-
-        public IEnumerator GetPublicPassportToken(
+        public IEnumerator GetPassportToken(
             OpenIDConnectArguments OpenIDConnectArguments, string code, string CodeVerifier,
             System.Action<TokenStatus, Token> callback,
             Action<ErrorCode, Exception> LoginFailAction,
@@ -174,21 +166,23 @@ namespace Maxst.Passport
             if (isForcedRefresh || (token == null || IsTokenExpired()))
             {
                 yield return new WaitUntil(() => IsTokenNotRenewing());
-                yield return FetchPublicPassportToken(OpenIDConnectArguments, code, CodeVerifier, LoginFailAction);
+                yield return FetchPassportToken(OpenIDConnectArguments, code, CodeVerifier, LoginFailAction);
             }
 
             callback?.Invoke(tokenStatus.Value, token);
         }
 
-        public IEnumerator GetConfidentialPassportToken(
-            OpenIDConnectArguments OpenIDConnectArguments, string code, string ClientSecret,
+        internal IEnumerator GetConfidentialPassportToken(
+            OpenIDConnectArguments OpenIDConnectArguments, string code,
             System.Action<TokenStatus, Token> callback,
             Action<ErrorCode, Exception> LoginFailAction
             )
         {
             yield return new WaitUntil(() => IsTokenNotRenewing());
-            yield return FetchConfidentialPassportToken(OpenIDConnectArguments, code, ClientSecret, LoginFailAction);
-
+            if (IsTokenExpired())
+            {
+                yield return FetchConfidentialPassportToken(OpenIDConnectArguments, code, LoginFailAction);
+            }
             callback?.Invoke(tokenStatus.Value, token);
         }
 
@@ -221,9 +215,20 @@ namespace Maxst.Passport
 
         private long MeasureRemainTimeSeconds()
         {
-            var dict = token.accessTokenDictionary;
+            var dict = token?.accessTokenDictionary;
             return dict != null && dict.GetTokenDictionary().ContainsKey(JwtTokenConstants.exp) ?
-                dict.GetTypedValue<long>(JwtTokenConstants.exp) - CurrentTimeSeconds(): 0;
+                dict.GetTypedValue<long>(JwtTokenConstants.exp) - CurrentTimeSeconds() : 0;
+        }
+
+        private long MeasureRefeshRemainTimeSeconds()
+        {
+            if (token == null) return 0;
+
+            var dict = token?.accessTokenDictionary;
+            int refreshExpiresIn = token?.refreshExpiresIn ?? 0;
+
+            return dict != null && dict.GetTokenDictionary().ContainsKey(JwtTokenConstants.iat) ?
+                dict.GetTypedValue<long>(JwtTokenConstants.iat) + refreshExpiresIn - CurrentTimeSeconds() : 0;
         }
 
         public bool IsTokenExpired()
@@ -231,9 +236,16 @@ namespace Maxst.Passport
             return MeasureRemainTimeSeconds() < ESTIMATED_EXPIRATION_TIME;
         }
 
+        public bool IsRefreshTokenExpired()
+        {
+            return MeasureRefeshRemainTimeSeconds() < ESTIMATED_EXPIRATION_TIME;
+        }
+
+
         private long ClinetTokenMeasureRemainTimeSeconds()
         {
             var dict = clientTokenDictionary;
+
             return dict != null && dict.GetTokenDictionary().ContainsKey(JwtTokenConstants.exp) ?
                 dict.GetTypedValue<long>(JwtTokenConstants.exp) - CurrentTimeSeconds() : 0;
         }
@@ -252,7 +264,7 @@ namespace Maxst.Passport
         {
             while (true)
             {
-                if (IsTokenExpired())
+                if (IsTokenExpired() && !IsRefreshTokenExpired())
                 {
                     yield return FetchPassportRefreshToken(ClientID, GrantType, RefreshToken
                         , e =>
@@ -266,27 +278,21 @@ namespace Maxst.Passport
                 }
                 else
                 {
+                    Debug.LogWarning(" Refresh token has expired. Please log in again.");
+                    yield break;
+
                     var time = MeasureRemainTimeSeconds();
                     yield return new WaitForSeconds(System.Math.Max(time / 2, 5));
                 }
             }
         }
 
-        public void ConfidentialPassportLogout(string clientSecret, System.Action success = null, System.Action<System.Exception> fail = null)
+        public void PassportLogout(System.Action success = null, System.Action<System.Exception> fail = null)
         {
             StopRefreshTokenCoroutine();
             System.IObservable<System.Object> ob = null;
 
-            ob = AuthService.Instance.ConfidentialPassportLogout(BearerAccessToken, ClientID, RefreshToken, clientSecret);
-            LogoutSubscribeOn(ob, success, fail);
-        }
-
-        public void PublicPassportLogout(System.Action success = null, System.Action<System.Exception> fail = null)
-        {
-            StopRefreshTokenCoroutine();
-            System.IObservable<System.Object> ob = null;
-
-            ob = AuthService.Instance.PublicPassportLogout(BearerAccessToken, ClientID, RefreshToken, IdToken);
+            ob = AuthService.Instance.PassportLogout(BearerAccessToken, ClientID, IdToken);
             LogoutSubscribeOn(ob, success, fail);
         }
 
@@ -315,7 +321,15 @@ namespace Maxst.Passport
         private IEnumerator FetchPassportRefreshToken(string clientId, string grantType, string refreshToken,
             Action<Exception> RefreshFailAction)
         {
-            System.IObservable<CredentialsToken> ob = AuthService.Instance.PassportRefreshToken(clientId, grantType, refreshToken);
+            IObservable<CredentialsToken> ob;
+
+            if (ClientType == ClientType.Public)
+            {
+                ob = AuthService.Instance.PassportRefreshToken(clientId, grantType, refreshToken);
+            }
+            else {
+                ob = AuthService.Instance.PassportConfidentialRefreshToken(clientId, grantType, refreshToken, ClientSecret);
+            }
 
             tokenStatus.Value = TokenStatus.Renewing;
 
@@ -324,7 +338,7 @@ namespace Maxst.Passport
                 .OnErrorRetry((Exception ex) => Debug.Log(ex), retryCount: 3, TimeSpan.FromSeconds(1))
                 .Subscribe(data =>   // on success
                 {
-                    Debug.Log("[FetchPassportRefreshToken] : " + data);
+                    Debug.Log($"[FetchPassportRefreshToken] {ClientType} data : " + data);
                     if (data != null)
                     {
                         Config(new Token
@@ -332,6 +346,7 @@ namespace Maxst.Passport
                             idToken = data.id_token,
                             accessToken = data.access_token,
                             refreshToken = data.refresh_token,
+                            refreshExpiresIn = data.refresh_expires_in,
                         });
                     }
                     else
@@ -356,7 +371,7 @@ namespace Maxst.Passport
         }
 
         private IEnumerator FetchConfidentialPassportToken(
-            OpenIDConnectArguments OpenIDConnectArguments, string Code, string ClientSecret,
+            OpenIDConnectArguments OpenIDConnectArguments, string Code,
             Action<ErrorCode, Exception> LoginFailAction)
         {
             tokenStatus.Value = TokenStatus.Renewing;
@@ -368,6 +383,8 @@ namespace Maxst.Passport
 
             OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.ClientID, out var ClientID);
 
+            OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.ClientSecret, out var ClientSecret);
+
 #if UNITY_ANDROID
             OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.AndroidRedirectUri, out var RedirectURI);
 #elif UNITY_IOS
@@ -376,11 +393,11 @@ namespace Maxst.Passport
             OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.WebRedirectUri, out var RedirectURI);
 #endif
 
-            Debug.Log($"[FetchToken] Confidential ClientID : {ClientID}");
-            Debug.Log($"[FetchToken] Confidential ClientSecret : {ClientSecret}");
-            Debug.Log($"[FetchToken] Confidential GrantType : {GrantType}");
-            Debug.Log($"[FetchToken] Confidential RedirectURI : {RedirectURI}");
-            Debug.Log($"[FetchToken] Confidential code : {Code}");
+            Debug.Log($"[FetchToken] ConfidentialPassportToken ClientID : {ClientID}");
+            Debug.Log($"[FetchToken] ConfidentialPassportToken ClientSecret : {ClientSecret}");
+            Debug.Log($"[FetchToken] ConfidentialPassportToken GrantType : {GrantType}");
+            Debug.Log($"[FetchToken] ConfidentialPassportToken RedirectURI : {RedirectURI}");
+            Debug.Log($"[FetchToken] ConfidentialPassportToken code : {Code}");
 
             ob = AuthService.Instance.ConfidentialPassportToken(ClientID, ClientSecret, GrantType, RedirectURI, Code);
 
@@ -390,22 +407,14 @@ namespace Maxst.Passport
             disposable.Dispose();
         }
 
-        [Obsolete]
         private IEnumerator FetchPassportClientToken(string applicationId, string applicationKey, string grantType, Action<ErrorCode, Exception> FailAction)
         {
             clientTokenStatus.Value = TokenStatus.Renewing;
 
             IObservable<ClientToken> ob = null;
 
-            if (EnvAdmin.Instance.CurrentEnv.Value == EnvType.Alpha)
-            {
-                ob = AuthService.Instance.AlphaPassportClientToken(applicationId, applicationKey, grantType);
-            }
-            else
-            {
-                ob = AuthService.Instance.PassportClientToken(applicationId, applicationKey, grantType);
-            }
-
+            ob = AuthService.Instance.PassportClientToken(applicationId, applicationKey, grantType);
+            
             var disposable = ob.SubscribeOn(Scheduler.MainThreadEndOfFrame)
                                 .ObserveOn(Scheduler.MainThread)
                                 .OnErrorRetry((Exception ex) => Debug.Log(ex), retryCount: 3, TimeSpan.FromSeconds(1))
@@ -415,6 +424,7 @@ namespace Maxst.Passport
                                     if (data != null)
                                     {
                                         ClientTokenConfig(data);
+                                        clientTokenReactiveProperty.Value = data;
                                     }
                                     else
                                     {
@@ -439,49 +449,7 @@ namespace Maxst.Passport
             disposable.Dispose();
         }
 
-        private IEnumerator FetchPassportClientTokenWithRealm(string realm, string applicationId, string applicationKey, string grantType, Action<ErrorCode, Exception> FailAction)
-        {
-            clientTokenStatus.Value = TokenStatus.Renewing;
-
-            IObservable<ClientToken> ob = null;
-
-            ob = AuthService.Instance.PassportClientTokenWithRealm(
-                realm, applicationId, applicationKey, grantType
-            );
-
-            var disposable = ob.SubscribeOn(Scheduler.MainThreadEndOfFrame)
-                                .ObserveOn(Scheduler.MainThread)
-                                .OnErrorRetry((Exception ex) => Debug.Log(ex), retryCount: 3, TimeSpan.FromSeconds(1))
-                                .Subscribe(data =>   // on success
-                                {
-                                    Debug.Log("[FetchPassportAppTokenWithRealm] FetchToken : " + data);
-                                    if (data != null)
-                                    {
-                                        ClientTokenConfig(data);
-                                    }
-                                    else
-                                    {
-                                        clientTokenStatus.Value = TokenStatus.Expired;
-                                        //LoginFailAction?.Invoke(null);
-                                    }
-                                },
-                                error => // on error
-                                {
-                                    Debug.LogWarning($"[FetchPassportAppTokenWithRealm] FetchToken error : {error}");
-                                    clientTokenStatus.Value = TokenStatus.Expired;
-                                    FailAction?.Invoke(ErrorCode.TOKEN_IS_EMPTY, error);
-                                },
-                                () =>
-                                {
-                                    Debug.Log("[FetchPassportAppTokenWithRealm] FetchToken complte : ");
-                                });
-
-            yield return new WaitUntil(() => IsClientTokenNotRenewing());
-            disposable.Dispose();
-        }
-
-
-        private IEnumerator FetchPublicPassportToken(
+        private IEnumerator FetchPassportToken(
             OpenIDConnectArguments OpenIDConnectArguments, string Code, string CodeVerifier,
             Action<ErrorCode, Exception> LoginFailAction
         )
@@ -503,13 +471,13 @@ namespace Maxst.Passport
             OpenIDConnectArguments.TryGetValue(OpenIDConnectArgument.WebRedirectUri, out var RedirectURI);
 #endif
 
-            Debug.Log($"[FetchToken] Public ClientID : {ClientID}");
-            Debug.Log($"[FetchToken] Public CodeVerifier : {CodeVerifier}");
-            Debug.Log($"[FetchToken] Public GrantType : {GrantType}");
-            Debug.Log($"[FetchToken] Public RedirectURI : {RedirectURI}");
-            Debug.Log($"[FetchToken] Public code : {Code}");
+            Debug.Log($"[FetchToken] PassportToken ClientID : {ClientID}");
+            Debug.Log($"[FetchToken] PassportToken CodeVerifier : {CodeVerifier}");
+            Debug.Log($"[FetchToken] PassportToken GrantType : {GrantType}");
+            Debug.Log($"[FetchToken] PassportToken RedirectURI : {RedirectURI}");
+            Debug.Log($"[FetchToken] PassportToken code : {Code}");
 
-            ob = AuthService.Instance.PublicPassportToken(ClientID, CodeVerifier, GrantType, RedirectURI, Code);
+            ob = AuthService.Instance.PassportToken(ClientID, CodeVerifier, GrantType, RedirectURI, Code);
 
             var disposable = TokenSubscribeOn(ob, LoginFailAction);
 
@@ -530,7 +498,7 @@ namespace Maxst.Passport
                                 var idToken = data.id_token;
                                 var accessToken = data.access_token;
                                 var refreshToken = data.refresh_token;
-
+                                
                                 if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
                                 {
                                     LoginFailAction?.Invoke(ErrorCode.TOKEN_IS_EMPTY, null);
@@ -539,12 +507,15 @@ namespace Maxst.Passport
                                 }
                                 else
                                 {
-                                    Config(new Token
+                                    var t = new Token
                                     {
                                         idToken = data.id_token,
                                         accessToken = data.access_token,
                                         refreshToken = data.refresh_token,
-                                    });
+                                        refreshExpiresIn = data.refresh_expires_in,
+                                    };
+                                    Config(t);
+                                    tokenReactiveProperty.Value = t;
                                 }
                             }
                             else
@@ -569,6 +540,7 @@ namespace Maxst.Passport
             PlayerPrefs.SetString(IdTokenKey, token?.idToken ?? "");
             PlayerPrefs.SetString(AccessTokenKey, token?.accessToken ?? "");
             PlayerPrefs.SetString(RefreshTokenKey, token?.refreshToken ?? "");
+            PlayerPrefs.SetInt(RefreshExpiresIn, token?.refreshExpiresIn ?? 0);
         }
 
         private void StoreClientToken(ClientToken token = null)
@@ -581,6 +553,8 @@ namespace Maxst.Passport
             var idToken = PlayerPrefs.GetString(IdTokenKey, "");
             var accessToken = PlayerPrefs.GetString(AccessTokenKey, "");
             var refreshToken = PlayerPrefs.GetString(RefreshTokenKey, "");
+            var refreshExpiresIn = PlayerPrefs.GetInt(RefreshExpiresIn);
+
             if (string.IsNullOrEmpty(accessToken)
                 || string.IsNullOrEmpty(refreshToken))
             {
@@ -593,6 +567,7 @@ namespace Maxst.Passport
                     idToken = idToken,
                     accessToken = accessToken,
                     refreshToken = refreshToken,
+                    refreshExpiresIn = refreshExpiresIn
                 });
             }
         }
