@@ -48,6 +48,7 @@ public class AvatarAddressableManager : MonoBehaviour
     [SerializeField] private List<UnityEngine.Object> SlotData = new();
     [SerializeField] private List<Texture2D> Texture2D = new();
 
+    public List<UMAWardrobeRecipe> GetAddressableUmaRecipe { get { return UMAWardrobeRecipe; }}
     public Subject<List<UMATextRecipe>> addressableloadComplete = new Subject<List<UMATextRecipe>>();
     public Subject<bool> addressableUpdateComplete = new Subject<bool>();
     private AvatarResourceManager avatarResourceManager;
@@ -94,16 +95,49 @@ public class AvatarAddressableManager : MonoBehaviour
     private async UniTask CreateAsync()
     {
         SetAvatarDataManager();
+        bool isResourceAllLoad = avatarResourceManager.IsResourceAllLoad();
 
         var avatarResources = GetAvatarResources();
         var saveAvatarResources = GetSaveAvatarResources();
         var publicResources = GetPublicResources();
-        var avatrarRes = SetAvatarRseources(avatarResources, saveAvatarResources, publicResources);
+        var avatarRes = SetAvatarRseources(saveAvatarResources, avatarResources, publicResources);
 
         Addressables.WebRequestOverride += SetHeader;
-        await AsyncInitTask(avatrarRes);
 
+        if (isResourceAllLoad)
+        {
+            await AsyncInitTask(avatarRes);
+        }
+        else {
+            await DefulatRenderResourcesLoad();
+        }
+        
         AddressableLoadComplete();
+    }
+
+    private async UniTask DefulatRenderResourcesLoad()
+    {
+        var saveResouces = GetSaveAvatarResources();
+        var defaultResource = GetPublicResources().Any(list => list.Value.Count > 0) ? 
+                                GetPublicResources() : GetAvatarResources();
+        Dictionary<string, AvatarResource> defaultRes = new Dictionary<string, AvatarResource>();
+
+        if (saveResouces.Count > 0)
+        {
+            await AsyncInitTask(SetAvatarRseources(saveResouces));
+        }
+        else
+        {
+            foreach(var res in defaultResource)
+            {
+                if (!defaultRes.ContainsKey(res.Key.ToString()) && res.Value.Count > 0)
+                {
+                    defaultRes.Add(res.Key.ToString(), res.Value[0]);
+                }
+            }
+
+            await AsyncInitTask(defaultRes.Values.ToList());
+        }
     }
 
     private List<AvatarResource> SetAvatarRseources(params Dictionary<Category, List<AvatarResource>>[] dicts)
@@ -157,6 +191,29 @@ public class AvatarAddressableManager : MonoBehaviour
         completionSource.TrySetResult();
     }
 
+    public async UniTask<IList<UnityEngine.Object>> AsyncEachTask(AvatarResource resouce)
+    {
+        var completionSource = new UniTaskCompletionSource<IList<UnityEngine.Object>>();
+
+        UMAAssetIndexer.Instance.changeAddressableName = resouce.id.ToString();
+
+        foreach(var each in resouce.resources)
+        {
+            var content = await Addressables.LoadContentCatalogAsync(each.catalogDownloadUri.uri, true).Task;
+
+            List<string> keys = new List<string>();
+
+            keys.AddRange(content.Keys.Select(s => s.ToString()));
+
+            await foreach (var _ in LocationLoad(each.catalogDownloadUri.uri, keys))
+            {
+                completionSource.TrySetResult(_.Result);
+            }
+        }
+
+        return await completionSource.Task;
+    }
+
     private async IAsyncEnumerable<AsyncOperationHandle<IList<UnityEngine.Object>>> LocationLoad(string path, IEnumerable<object> Keys)
     {
         var locations = Addressables.LoadResourceLocationsAsync(Keys, Addressables.MergeMode.Union);
@@ -169,7 +226,10 @@ public class AvatarAddressableManager : MonoBehaviour
 
         if (recipeOp.Result != null)
         {
-            bundleCacheDic.Add(path, recipeOp);
+            if (!bundleCacheDic.ContainsKey(path))
+            {
+                bundleCacheDic.Add(path, recipeOp);
+            }
         }
 
         recipeOp.Completed += (obj) =>
@@ -256,32 +316,32 @@ public class AvatarAddressableManager : MonoBehaviour
                 switch (Each)
                 {
                     case UMAWardrobeRecipe umaWardrobeRecipe:
-                        UMAWardrobeRecipe.Add(umaWardrobeRecipe);
+                        AddCheckList(UMAWardrobeRecipe, umaWardrobeRecipe);
                         break;
                     case OverlayDataAsset overlayDataAsset:
-                        OverlayDataAsset.Add(overlayDataAsset);
+                        AddCheckList(OverlayDataAsset, overlayDataAsset);
                         UMAAssetIndexer.Instance.ProcessNewItem(Each, true, true);
                         break;
                     case UMATextRecipe umaTextRecipe:
-                        UMATextRecipe.Add(umaTextRecipe);
+                        AddCheckList(UMATextRecipe, umaTextRecipe);
                         break;
                     case RaceData raceData:
-                        RaceData.Add(raceData);
+                        AddCheckList(RaceData, raceData);
                         break;
                     case UmaTPose umaTPose:
-                        UmaTPose.Add(umaTPose);
+                        AddCheckList(UmaTPose, umaTPose);
                         break;
                     case DynamicUMADnaAsset dynamicUMADnaAsset:
-                        DynamicUMADnaAsset.Add(dynamicUMADnaAsset);
+                        AddCheckList(DynamicUMADnaAsset, dynamicUMADnaAsset);
                         break;
                     case DynamicDNAConverterController dynamicDNAConverterController:
-                        DynamicDNAConverterController.Add(dynamicDNAConverterController);
+                        AddCheckList(DynamicDNAConverterController, dynamicDNAConverterController);
                         break;
                     case Texture2D texture2D:
-                        Texture2D.Add(texture2D);
+                        AddCheckList(Texture2D, texture2D);
                         break;
-                    default:
-                        SlotData.Add(Each);
+                    case SlotDataAsset slotdata:
+                        AddCheckList(SlotData, slotdata);
                         UMAAssetIndexer.Instance.ProcessNewItem(Each, true, true);
                         break;
                 }
@@ -317,34 +377,33 @@ public class AvatarAddressableManager : MonoBehaviour
                 switch (Each)
                 {
                     case UMAWardrobeRecipe umaWardrobeRecipe:
-                        UMAWardrobeRecipe.Add(umaWardrobeRecipe);
+                        AddCheckList(UMAWardrobeRecipe, umaWardrobeRecipe);
                         break;
                     case OverlayDataAsset overlayDataAsset:
-                        OverlayDataAsset.Add(overlayDataAsset);
+                        AddCheckList(OverlayDataAsset, overlayDataAsset);
                         UMAAssetIndexer.Instance.ProcessNewItem(Each, true, true);
                         break;
                     case UMATextRecipe umaTextRecipe:
-                        UMATextRecipe.Add(umaTextRecipe);
+                        AddCheckList(UMATextRecipe, umaTextRecipe);
                         break;
                     case RaceData raceData:
-                        RaceData.Add(raceData);
+                        AddCheckList(RaceData, raceData);
                         break;
                     case UmaTPose umaTPose:
-                        UmaTPose.Add(umaTPose);
+                        AddCheckList(UmaTPose, umaTPose);
                         break;
                     case DynamicUMADnaAsset dynamicUMADnaAsset:
-                        DynamicUMADnaAsset.Add(dynamicUMADnaAsset);
+                        AddCheckList(DynamicUMADnaAsset, dynamicUMADnaAsset);
                         break;
                     case DynamicDNAConverterController dynamicDNAConverterController:
-                        DynamicDNAConverterController.Add(dynamicDNAConverterController);
+                        AddCheckList(DynamicDNAConverterController, dynamicDNAConverterController);
                         break;
                     case Texture2D texture2D:
-                        Texture2D.Add(texture2D);
+                        AddCheckList(Texture2D, texture2D);
                         break;
                     case SlotDataAsset slotdata:
-                        SlotData.Add(slotdata);
-                        var temp = path.Split('/');
-                        if (temp.Length >= 4) resAppIdDict[slotdata.slotName] = path.Split('/')[4];
+                        AddCheckList(SlotData, slotdata);
+                        SetRestAppIdDict(slotdata.slotName, path);
 
                         UMAAssetIndexer.Instance.ProcessNewItem(Each, true, true);
                         break;
@@ -352,7 +411,14 @@ public class AvatarAddressableManager : MonoBehaviour
             }
         }
         Debug.Log($"Recipes_Loaded {obj.Count}");
+    }
 
+    private void AddCheckList<T>(List<T> list, T item)
+    {
+        if (!list.Contains(item))
+        {
+            list.Add(item);
+        }
     }
 
     private void AddressableLoadComplete()
@@ -399,6 +465,12 @@ public class AvatarAddressableManager : MonoBehaviour
     public Dictionary<string, string> GetResAppIdDict()
     {
         return resAppIdDict;
+    }
+
+    public void SetRestAppIdDict(string slotName, string path)
+    {
+        var temp = path.Split('/');
+        if (temp.Length >= 4) resAppIdDict[slotName] = path.Split('/')[4];
     }
 #endif
 }

@@ -114,6 +114,32 @@ namespace Maxst.Avatar
 
             return await taskCompletionSource.Task;
         }
+
+        public async UniTask<ThumbnailDownLoadUri> FetchThumbnailDownLoadUri(string token, string uri)
+        {
+            TaskCompletionSource<ThumbnailDownLoadUri> taskCompletionSource = new();
+
+            using UnityWebRequest request = UnityWebRequest.Get(uri);
+
+            request.SetRequestHeader("Authorization", "Bearer " + token);
+
+            await request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log($"Request successful. Response: {request.downloadHandler.text}");
+
+                var result = request.downloadHandler.text;
+                taskCompletionSource.TrySetResult(JsonUtility.FromJson<ThumbnailDownLoadUri>(result));
+
+            }
+            else
+            {
+                Debug.LogError($"Request failed. Error: {request.error}");
+            }
+
+            return await taskCompletionSource.Task;
+        }
     }
 }
 

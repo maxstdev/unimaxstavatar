@@ -49,3 +49,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95242dda102939e4781383c736c4da05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isResourceFullLoad: 0

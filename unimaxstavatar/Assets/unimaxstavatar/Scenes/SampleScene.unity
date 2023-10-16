@@ -1365,6 +1365,10 @@ PrefabInstance:
       propertyPath: sceneName
       value: AvatarScene
       objectReference: {fileID: 0}
+    - target: {fileID: 482611804587131043, guid: 0d06a543d536ecd45b691923f7149b73, type: 3}
+      propertyPath: isResourceFullLoad
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 482611804587131046, guid: 0d06a543d536ecd45b691923f7149b73, type: 3}
       propertyPath: m_Name
       value: AvatarResourceManager

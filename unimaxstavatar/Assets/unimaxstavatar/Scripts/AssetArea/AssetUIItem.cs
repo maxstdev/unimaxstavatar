@@ -1,3 +1,4 @@
+using Maxst.Passport;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -40,5 +41,14 @@ namespace Maxst.Avatar
             thumbnailImg.sprite = thumbnail;
         }
 
+        public void SetData(string thumbailpath)
+        {
+            Dictionary<string, string> token = new();
+            token.Add("token", "Bearer " + TokenRepo.Instance.GetToken().accessToken);
+
+            Davinci.get().load(thumbailpath).setFadeTime(0)
+                        .SetHeaders(token)
+                        .into(thumbnailImg).setCached(true).start();
+        }
     }
 }

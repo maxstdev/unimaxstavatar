@@ -21,15 +21,13 @@ namespace Maxst.Avatar
 
         private List<string> visibleResAppIds = new List<string>();
 
+        [SerializeField]
+        private bool isResourceAllLoad;
+
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);
             avatarResourceService = new AvatarResourceService();
-        }
-
-        private void Start()
-        {
-            
         }
 
         public void SetVisibleResAppIds(List<string> appIds) {
@@ -120,20 +118,20 @@ namespace Maxst.Avatar
         {
             Dictionary<Category, List<AvatarResource>> saveAvatarResources = new Dictionary<Category, List<AvatarResource>>();
 
-            List<AvatarResource> temp = new List<AvatarResource>();
-
             foreach (var slot in saveRecipeExtensions.slots)
             {
+                var avatarResouce = new AvatarResource();
+
+                avatarResouce.thumbnailDownLoadUri = await avatarResourceService.FetchThumbnailDownLoadUri(token, slot.imageUri);
+
                 foreach (var each in slot.assetResourceInfo)
                 {
                     each.catalogDownloadUri = await avatarResourceService.FetchCatalogDownLoadUri(token, each.catalogUri);
-                    temp.Add(new AvatarResource
-                    {
-                        id = slot.itemId,
-                        resources = new List<Resource>() { each }
-                    });
+                    avatarResouce.id = slot.itemId;
+                    avatarResouce.subCategory = slot.slot;
+                    avatarResouce.resources = new List<Resource>() { each };
                 }
-                saveAvatarResources[CategoryHelper.GetCategoryFromString(slot.slot)] = temp;
+                saveAvatarResources[CategoryHelper.GetCategoryFromString(slot.slot)] = new List<AvatarResource>() { avatarResouce };
             }
             onComplete?.Invoke(saveAvatarResources);
         }
@@ -154,6 +152,7 @@ namespace Maxst.Avatar
                 {
                     if (resource.hidden) continue;
 
+                    resource.thumbnailDownLoadUri = await avatarResourceService.FetchThumbnailDownLoadUri(token, resource.imageUri);
                     foreach (var each in resource.resources)
                     {
                         each.catalogDownloadUri = await avatarResourceService.FetchCatalogDownLoadUri(token, each.catalogUri);
@@ -188,6 +187,10 @@ namespace Maxst.Avatar
         public Dictionary<Category, List<AvatarResource>> GetPublicResources()
         {
             return publicResources;
+        }
+
+        public bool IsResourceAllLoad() {
+            return isResourceAllLoad;
         }
     }
 }
