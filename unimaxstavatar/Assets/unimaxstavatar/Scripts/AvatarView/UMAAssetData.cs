@@ -12,6 +12,7 @@ namespace Maxst.Avatar
         public string slotName;
         public string recipeString;
         public bool isSelect;
+        public string thumbnailpath;
     }
 
     public class UMAAssetData

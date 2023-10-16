@@ -15,7 +15,7 @@ MonoBehaviour:
   keys: 0000000001000000020000000300000004000000
   values:
   - S256
-  - /profile/v1/public/oauth/authorize
+  - /passport/authorize
   - '{0}{1}?client_id={2}&response_type={3}&scope={4}&redirect_uri={5}&code_challenge={6}&code_challenge_method={7}'
-  - '{0}{1}?client_id={2}&response_type={3}&scope={4}&redirect_uri={5}&client_secret={6}'
+  - '{0}{1}?client_id={2}&response_type={3}&scope={4}&redirect_uri={5}'
   - authorization_code

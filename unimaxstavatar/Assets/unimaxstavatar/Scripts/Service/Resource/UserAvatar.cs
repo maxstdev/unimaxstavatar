@@ -30,9 +30,14 @@ namespace Maxst.Avatar
             [SerializeField]
             public string recipe;
 
+            [JsonProperty("imageUri")]
+            public string imageUri;
+
             [JsonProperty("assetResourceInfo")]
             [SerializeField]
             public List<Resource> assetResourceInfo;
+
+            public ThumbnailDownLoadUri thumbnailDownLoadUri;
         }
     }
 }

@@ -1,4 +1,5 @@
 using Castle.Core.Internal;
+using Cysharp.Threading.Tasks;
 using Maxst.Resource;
 using Maxst.Settings;
 using System;
@@ -9,6 +10,8 @@ using UMA;
 using UMA.CharacterSystem;
 using UniRx;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
+
 
 namespace Maxst.Avatar
 {
@@ -53,10 +56,13 @@ namespace Maxst.Avatar
         private ViewType beforeViewType = ViewType.None;
 
         private AvatarResourceManager avatarResourceManager;
+        private bool isResourceAllLoad;
+
 
         void Awake()
         {
             SetAvatarDataManager();
+            isResourceAllLoad = avatarResourceManager.IsResourceAllLoad();
 
             addressableloader = GetComponent<AvatarAddressableManager>();
             addressableloader.addressableloadComplete
@@ -134,8 +140,14 @@ namespace Maxst.Avatar
                     //ColorUiInitColor(value);
                     GetAvatarWardrobeSlotRecipe(value);
 
-                    LoadScrollerDataFromAsset(value, avatarResourceManager.GetVisibleResAppIds());
-
+                    if (isResourceAllLoad)
+                    {
+                        LoadScrollerDataFromAsset(value, avatarResourceManager.GetVisibleResAppIds());
+                    }
+                    else
+                    {
+                        LoadScrollDataFromResourceServer(value, avatarResourceManager.GetVisibleResAppIds());
+                    }
                 })
                 .AddTo(this);
 
@@ -189,7 +201,13 @@ namespace Maxst.Avatar
             assetAreaUI.slotname
                 .Subscribe(name =>
                 {
-                    DressUpAvatar(assetData.GetTextRecipe(name));
+                    if (isResourceAllLoad)
+                    {
+                        DressUpAvatar(assetData.GetTextRecipe(name));
+                    }
+                    else {
+                        DressUpAvatarAsync(name).Forget();
+                    }
                 });
         }
 
@@ -200,6 +218,58 @@ namespace Maxst.Avatar
                 Avatar.SetSlot(recipe);
             });
             Avatar.BuildCharacter(true);
+        }
+
+        private async UniTask DressUpAvatarAsync(string slotname)
+        {
+            var item = await GetCachedCheckRecipe(slotname);
+            DressUpAvatar(item);
+        }
+
+        private async UniTask<UMATextRecipe> GetCachedCheckRecipe(string slotname)
+        {
+            UMATextRecipe slotitem = null;
+
+            var cacheditem = addressableloader.GetAddressableUmaRecipe
+                    .FirstOrDefault(item => item.name.Equals(slotname));
+
+            if (cacheditem)
+            {
+                slotitem = cacheditem;
+            }
+            else
+            {
+                var res = GetAvatarResouces();
+                var selectRes = res.FirstOrDefault(item => item.id.ToString().Equals(slotname));
+
+                var loadOjbect = await addressableloader.AsyncEachTask(selectRes);
+                foreach (var item in loadOjbect)
+                {
+                    if(item as UMAWardrobeRecipe)
+                    {
+                        slotitem = item as UMATextRecipe;
+                    }
+                }
+            }
+            
+            return slotitem;
+        }
+
+        private List<AvatarResource> GetAvatarResouces()
+        {
+            var result = new List<AvatarResource>();
+
+            var avatarRes = avatarResourceManager.GetAvatarResources();
+            var publicRes = avatarResourceManager.GetPublicResources();
+            var saveRes = avatarResourceManager.GetSaveAvatarResources();
+            
+            result.AddRange(avatarRes.Values.SelectMany(list => list));
+            result.AddRange(publicRes.Values.SelectMany(list => list));
+            var notContainRes = saveRes.Values.SelectMany(list => list)
+                .Where(saveEach => !result.Any(item => item.id == saveEach.id));
+            result.AddRange(notContainRes);
+
+            return result;
         }
 
         private void OnAdjust(ViewType viewType)
@@ -439,7 +509,59 @@ namespace Maxst.Avatar
                         break;
                     }
                 }
+                
                 assetAreaUI.CreateAssetItem(slot.slotName, slot.thumbnail, isSelected);
+            });
+        }
+
+        private async void LoadScrollDataFromResourceServer(string value, List<string> showResAppIds)
+        {
+            await addressableloader.UpdateCatalogChecked();
+
+            var list = new List<AssetAreaData>();
+            var resDict = addressableloader.GetResAppIdDict();
+
+            assetAreaUI.DeleteAllItem();
+
+            var resources = GetAvatarResouces();
+            var slotResource = resources.Where(res => res.subCategory.Equals(value));
+
+            foreach (var res in slotResource)
+            {
+                string resId = res.id.ToString();
+
+                if (!resDict.ContainsKey(resId))
+                {
+                    addressableloader.SetRestAppIdDict(resId, res.thumbnailDownLoadUri.uri);
+                }
+                resDict.TryGetValue(resId, out var checkAppId);
+
+                var isshow = showResAppIds.Any(id => checkAppId.Equals(id));
+
+                if (isshow)
+                {
+                    list.Add(new AssetAreaData()
+                    {
+                        resId = resId,
+                        slotName = resId,
+                        thumbnailpath = res.thumbnailDownLoadUri.uri
+                    });
+                }
+            }
+
+            list.ForEach(slot =>
+            {
+                var isSelected = false;
+                foreach (var each in Avatar.WardrobeRecipes)
+                {
+                    if (slot.slotName.Equals(each.Value.name))
+                    {
+                        isSelected = true;
+                        break;
+                    }
+                }
+
+                assetAreaUI.CreateAssetItem(slot.slotName, slot.thumbnailpath, isSelected);
             });
         }
 
@@ -449,7 +571,14 @@ namespace Maxst.Avatar
 
             if (!string.IsNullOrEmpty(slotValue))
             {
-                LoadScrollerDataFromAsset(slotValue, avatarResourceManager.GetVisibleResAppIds());
+                if (isResourceAllLoad)
+                {
+                    LoadScrollerDataFromAsset(slotValue, avatarResourceManager.GetVisibleResAppIds());
+                }
+                else
+                {
+                    LoadScrollDataFromResourceServer(slotValue, avatarResourceManager.GetVisibleResAppIds());
+                }
             }
 
             RefreshBtnStateUI();
@@ -457,7 +586,11 @@ namespace Maxst.Avatar
 
         private void UndoSelectUI()
         {
+#if true
+            LoadScrollDataFromResourceServer(categoryAreaUI.categoryWardrobeslot.Value, avatarResourceManager.GetVisibleResAppIds());
+#else
             LoadScrollerDataFromAsset(categoryAreaUI.categoryWardrobeslot.Value, avatarResourceManager.GetVisibleResAppIds());
+#endif
             UndoBtnStateUI();
         }
 

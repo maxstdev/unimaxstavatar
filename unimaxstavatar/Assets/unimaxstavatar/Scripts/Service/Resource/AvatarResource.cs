@@ -31,6 +31,8 @@ namespace Maxst.Avatar
         [JsonProperty("createdAt")]
         public string createdAt;
 
+        public ThumbnailDownLoadUri thumbnailDownLoadUri;
+
         public override bool Equals(object obj)
         {
             if (!(obj is AvatarResource))

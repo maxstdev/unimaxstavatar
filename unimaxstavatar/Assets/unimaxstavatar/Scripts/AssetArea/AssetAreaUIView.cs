@@ -29,6 +29,20 @@ namespace Maxst.Avatar
             assetItemList.Add(item);
         }
 
+        public void CreateAssetItem(string slotName, string thumnailpath, bool isSelected)
+        {
+            AssetUIItem item = Instantiate(assetitemPrefab, assetScrollview.content);
+            item.SetData(thumnailpath);
+            item.OnclickButton = () =>
+            {
+                itemSelectChange(item);
+                slotname.OnNext(slotName);
+            };
+            item.isSelect.Value = isSelected;
+
+            assetItemList.Add(item);
+        }
+
         public void DeleteAllItem()
         {
             foreach (var asset in assetItemList)
