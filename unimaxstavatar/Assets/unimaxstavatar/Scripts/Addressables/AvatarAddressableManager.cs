@@ -95,7 +95,7 @@ public class AvatarAddressableManager : MonoBehaviour
     private async UniTask CreateAsync()
     {
         SetAvatarDataManager();
-        bool isResourceAllLoad = avatarResourceManager.IsResourceAllLoad();
+        bool isResourceFullLoad = avatarResourceManager.IsResourceFullLoad();
 
         var avatarResources = GetAvatarResources();
         var saveAvatarResources = GetSaveAvatarResources();
@@ -104,7 +104,7 @@ public class AvatarAddressableManager : MonoBehaviour
 
         Addressables.WebRequestOverride += SetHeader;
 
-        if (isResourceAllLoad)
+        if (isResourceFullLoad)
         {
             await AsyncInitTask(avatarRes);
         }

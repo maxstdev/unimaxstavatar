@@ -56,13 +56,13 @@ namespace Maxst.Avatar
         private ViewType beforeViewType = ViewType.None;
 
         private AvatarResourceManager avatarResourceManager;
-        private bool isResourceAllLoad;
+        private bool isResourceFullLoad;
 
 
         void Awake()
         {
             SetAvatarDataManager();
-            isResourceAllLoad = avatarResourceManager.IsResourceAllLoad();
+            isResourceFullLoad = avatarResourceManager.IsResourceFullLoad();
 
             addressableloader = GetComponent<AvatarAddressableManager>();
             addressableloader.addressableloadComplete
@@ -140,7 +140,7 @@ namespace Maxst.Avatar
                     //ColorUiInitColor(value);
                     GetAvatarWardrobeSlotRecipe(value);
 
-                    if (isResourceAllLoad)
+                    if (isResourceFullLoad)
                     {
                         LoadScrollerDataFromAsset(value, avatarResourceManager.GetVisibleResAppIds());
                     }
@@ -201,7 +201,7 @@ namespace Maxst.Avatar
             assetAreaUI.slotname
                 .Subscribe(name =>
                 {
-                    if (isResourceAllLoad)
+                    if (isResourceFullLoad)
                     {
                         DressUpAvatar(assetData.GetTextRecipe(name));
                     }
@@ -571,7 +571,7 @@ namespace Maxst.Avatar
 
             if (!string.IsNullOrEmpty(slotValue))
             {
-                if (isResourceAllLoad)
+                if (isResourceFullLoad)
                 {
                     LoadScrollerDataFromAsset(slotValue, avatarResourceManager.GetVisibleResAppIds());
                 }

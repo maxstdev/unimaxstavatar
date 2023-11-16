@@ -1,11 +1,17 @@
+using Castle.Core;
 using Cysharp.Threading.Tasks;
 using Maxst.Passport;
 using Maxst.Resource;
 using Maxst.Token;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using UniRx;
 using UnityEngine;
+using UnityEngine.Networking.Types;
 using UnityEngine.SceneManagement;
+using static UnityEngine.Networking.UnityWebRequest;
 
 namespace Maxst.Avatar
 {
@@ -22,12 +28,22 @@ namespace Maxst.Avatar
         private List<string> visibleResAppIds = new List<string>();
 
         [SerializeField]
-        private bool isResourceAllLoad;
+        private bool isResourceFullLoad;
 
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);
             avatarResourceService = new AvatarResourceService();
+
+            TokenRepo.Instance
+                .tokenStatus.Subscribe(status =>
+                {
+                    if (status == TokenStatus.Validate) {
+                        var appId = TokenRepo.Instance.GetToken().accessTokenDictionary.GetTypedValue<string>(JwtTokenConstants.app);
+                        SetVisibleResAppIds(new List<string> { appId, AvatarConstant.PUBLIC_RESOURCE_APPID });
+                    }
+                })
+                .AddTo(this);
         }
 
         public void SetVisibleResAppIds(List<string> appIds) {
@@ -85,12 +101,13 @@ namespace Maxst.Avatar
         public void OnClickAvatar()
         {
             var appId = TokenRepo.Instance.GetToken().accessTokenDictionary.GetTypedValue<string>(JwtTokenConstants.app);
-            SetVisibleResAppIds(new List<string> { appId, AvatarConstant.PUBLIC_RESOURCE_APPID });
-
-            FetchAvatarResource();
+            FetchAvatarResource(() => {
+                Debug.Log("[AvatarResourceManager] res load complete!");
+                SceneManager.LoadScene("AvatarScene");
+            });
         }
 
-        public async void FetchAvatarResource()
+        public async void FetchAvatarResource(Action action = null)
         {
             var categoryList = new List<Category>() { Category.Hair, Category.Legs, Category.Feet, Category.Chest };
             var token = GetAccessToken();
@@ -98,15 +115,22 @@ namespace Maxst.Avatar
 
             var platform = ResourceSettingSO.Instance.Platform;
 
-            await FetchAppAvatarResources(AvatarConstant.MAIN_CATEGORY, categoryList, platform, appId, (result =>
+            var apptask = FetchAppAvatarResources(AvatarConstant.MAIN_CATEGORY, categoryList, platform, appId, (result =>
             {
                 avatarResources = result;
             }));
-            await FetchAppAvatarResources(AvatarConstant.MAIN_CATEGORY, categoryList, platform, AvatarConstant.PUBLIC_RESOURCE_APPID, (result =>
+            var publictask = FetchAppAvatarResources(AvatarConstant.MAIN_CATEGORY, categoryList, platform, AvatarConstant.PUBLIC_RESOURCE_APPID, (result =>
             {
                 publicResources = result;
             }));
 
+            await UniTask.WhenAll(apptask, publictask);
+            
+            action?.Invoke();
+        }
+
+        public void OnClickScene()
+        {
             SceneManager.LoadScene("AvatarScene");
         }
 
@@ -114,55 +138,89 @@ namespace Maxst.Avatar
             UserAvatar saveRecipeExtensions,
             string token,
             Action<Dictionary<Category, List<AvatarResource>>> onComplete
-        )
+         )
         {
-            Dictionary<Category, List<AvatarResource>> saveAvatarResources = new Dictionary<Category, List<AvatarResource>>();
+            Dictionary<Category, List<AvatarResource>> userSaveAvatarResources = new Dictionary<Category, List<AvatarResource>>();
+
+            var catalogDownloadTasks = new List<UniTask>();
 
             foreach (var slot in saveRecipeExtensions.slots)
             {
-                var avatarResouce = new AvatarResource();
+                var avatarResource = new AvatarResource();
+                var resInfo = slot.assetResourceInfo[0];
 
-                avatarResouce.thumbnailDownLoadUri = await avatarResourceService.FetchThumbnailDownLoadUri(token, slot.imageUri);
+                catalogDownloadTasks.Add(FetchCatalogDownloadUriAsync(avatarResource, token, resInfo));
 
-                foreach (var each in slot.assetResourceInfo)
-                {
-                    each.catalogDownloadUri = await avatarResourceService.FetchCatalogDownLoadUri(token, each.catalogUri);
-                    avatarResouce.id = slot.itemId;
-                    avatarResouce.subCategory = slot.slot;
-                    avatarResouce.resources = new List<Resource>() { each };
-                }
-                saveAvatarResources[CategoryHelper.GetCategoryFromString(slot.slot)] = new List<AvatarResource>() { avatarResouce };
+                avatarResource.id = slot.itemId;
+                avatarResource.subCategory = slot.slot;
+                avatarResource.resources = new List<Resource>() { resInfo };
+
+                userSaveAvatarResources[CategoryHelper.GetCategoryFromString(slot.slot)] = new List<AvatarResource>() { avatarResource };
             }
-            onComplete?.Invoke(saveAvatarResources);
+            
+            await UniTask.WhenAll(catalogDownloadTasks);
+            await UniTask.WhenAll(saveRecipeExtensions.slots.Select(async slot =>
+            {
+                var avatarResource = userSaveAvatarResources[CategoryHelper.GetCategoryFromString(slot.slot)][0];
+                avatarResource.thumbnailDownLoadUri = await avatarResourceService.FetchThumbnailDownLoadUri(token, slot.imageUri);
+            }));
+
+            onComplete?.Invoke(userSaveAvatarResources);
+        }
+        private async UniTask FetchCatalogDownloadUriAsync(AvatarResource avatarResource, string token, Resource resInfo)
+        {
+            resInfo.catalogDownloadUri = await avatarResourceService.FetchCatalogDownLoadUri(token, resInfo.catalogUri);
         }
 
         public async UniTask FetchAppAvatarResources(string mainCategory, List<Category> subCategoryList, Platform platform, string appId, Action<Dictionary<Category, List<AvatarResource>>> onComplete)
         {
+            string platformString = platform.ToString();
+
+            Dictionary<Category, List<AvatarResource>> result = new Dictionary<Category, List<AvatarResource>>();
+            
+            foreach (var subCategory in subCategoryList)
+            {
+                foreach (var task in await UniTask.WhenAll(FetchAvatarResourcesAsync(subCategory, platform, mainCategory, appId)))
+                {
+                    result[subCategory] = task;
+                }
+            }
+
+            onComplete.Invoke(result);
+        }
+
+        private async UniTask<List<AvatarResource>> FetchAvatarResourcesAsync(Category subCategory, Platform platform, string mainCategory, string appId)
+        {
             string token = GetAccessToken();
             string platformString = platform.ToString();
 
-            Dictionary<Category, List<AvatarResource>> avatarResources = new Dictionary<Category, List<AvatarResource>>();
+            List<AvatarResource> resources = await avatarResourceService.FetchAvatarResources(token, mainCategory, subCategory.ToString(), platformString, appId);
+            List<AvatarResource> temp = new List<AvatarResource>();
 
-            foreach (var subCategory in subCategoryList)
+            List<UniTask> resTask = new();
+            foreach (var resource in resources)
             {
-                List<AvatarResource> resources = await avatarResourceService.FetchAvatarResources(token, mainCategory, subCategory.ToString(), platformString, appId);
-                List<AvatarResource> temp = new List<AvatarResource>();
-
-                foreach (var resource in resources)
-                {
-                    if (resource.hidden) continue;
-
-                    resource.thumbnailDownLoadUri = await avatarResourceService.FetchThumbnailDownLoadUri(token, resource.imageUri);
-                    foreach (var each in resource.resources)
-                    {
-                        each.catalogDownloadUri = await avatarResourceService.FetchCatalogDownLoadUri(token, each.catalogUri);
-                        temp.Add(resource);
-                    }
-                }
-                avatarResources[subCategory] = temp;
+                var task = FetchDownLoadUriAsync(token, resource);
+                resTask.Add(task);
             }
 
-            onComplete.Invoke(avatarResources);
+            await UniTask.WhenAll(resTask);
+
+            temp.AddRange(resources);
+
+            return temp;
+        }
+
+        private async UniTask FetchDownLoadUriAsync(string token, AvatarResource resource)
+        {
+            if (resource.hidden) return;
+
+            resource.thumbnailDownLoadUri = await avatarResourceService.FetchThumbnailDownLoadUri(token, resource.imageUri);
+
+            foreach (var each in resource.resources)
+            {
+                each.catalogDownloadUri = await avatarResourceService.FetchCatalogDownLoadUri(token, each.catalogUri);
+            }
         }
 
         private string GetAccessToken()
@@ -189,8 +247,8 @@ namespace Maxst.Avatar
             return publicResources;
         }
 
-        public bool IsResourceAllLoad() {
-            return isResourceAllLoad;
+        public bool IsResourceFullLoad() {
+            return isResourceFullLoad;
         }
     }
 }

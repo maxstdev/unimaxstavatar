@@ -56,15 +56,13 @@ namespace Maxst.Avatar
             {
                 avatar.MaxstDoLoad();
             }
-            else
+            
+            avatar.DefaultTextRecipe?.ForEach(recipe =>
             {
-                avatar.DefaultTextRecipe.ForEach(recipe =>
-                {
-                    avatar.SetSlot(recipe);
-                });
-            }
+                avatar.SetSlot(recipe);
+            });
 
-            recipeList.ForEach(recipe =>
+            recipeList?.ForEach(recipe =>
             {
                 avatar.SetSlot(recipe);
             });
