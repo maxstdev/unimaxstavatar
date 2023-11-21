@@ -52,16 +52,6 @@ namespace Maxst.Avatar
         {
             avatar.ClearSlots();
 
-            if (avatar.IsAvatarSaveData())
-            {
-                avatar.MaxstDoLoad();
-            }
-            
-            avatar.DefaultTextRecipe?.ForEach(recipe =>
-            {
-                avatar.SetSlot(recipe);
-            });
-
             recipeList?.ForEach(recipe =>
             {
                 avatar.SetSlot(recipe);
