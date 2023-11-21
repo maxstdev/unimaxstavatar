@@ -213,6 +213,8 @@ namespace Maxst.Avatar
 
         private void SetDefaultAvatar()
         {
+            wearingRecipeList = defaultTextRecipe;
+
             defaultTextRecipe.ForEach(recipe =>
             {
                 Avatar.SetSlot(recipe);
