@@ -14,6 +14,7 @@ using SlotRecipes = System.Collections.Generic.Dictionary<string, System.Collect
 using RaceRecipes = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<UMA.UMATextRecipe>>>;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -21,7 +22,10 @@ using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using UMA;
 using System.Resources;
+using Castle.Core.Internal;
+using static System.Runtime.CompilerServices.YieldAwaitable;
 #endif
+
 
 namespace UMA
 {
@@ -1120,7 +1124,41 @@ namespace UMA
         }
 #endif
 
-        //static List<UnityEngine.Object> ProcessedItems = new List<UnityEngine.Object>();
+        public async Task<IList<UnityEngine.Object>> LoadLabelList(List<string> Keys, bool keepLoaded, string id, Action<DownloadStatus> action = null)
+        {
+            foreach (string label in Keys)
+            {
+                if (!Preloads.ContainsKey(label))
+                {
+                    Preloads[label] = keepLoaded;
+                }
+                else
+                {
+                    if (keepLoaded) // only overwrite if keepLoaded = true. All "keepLoaded" take precedence.
+                        Preloads[label] = keepLoaded;
+                }
+            }
+
+            var op = Addressables.LoadAssetsAsync<UnityEngine.Object>(Keys, result =>
+            {
+            }, Addressables.MergeMode.Union, false);
+
+            op.Completed += (asyncOp) => ProcessItems(asyncOp, id);
+
+            while (!op.IsDone) {
+                action?.Invoke(op.GetDownloadStatus());
+                await Task.Yield();
+            }
+            
+            if (!keepLoaded)
+            {
+                string info = "";
+                foreach (string s in Keys)
+                    info += Keys + "; ";
+                LoadedItems.Add(new CachedOp(op, info));
+            }
+            return op.Result;
+        }
 
         public AsyncOperationHandle<IList<UnityEngine.Object>> LoadLabelList(List<string> Keys, bool keepLoaded)
         {
@@ -1141,7 +1179,9 @@ namespace UMA
             var op = Addressables.LoadAssetsAsync<UnityEngine.Object>(Keys, result =>
             {
             }, Addressables.MergeMode.Union, false);
-			op.Completed += ProcessItems;
+			
+            op.Completed += (AsyncOp) => ProcessItems(AsyncOp);
+
             if (!keepLoaded)
             {
                 string info = "";
@@ -1152,7 +1192,7 @@ namespace UMA
             return op;
         }
 
-        private void ProcessItems(AsyncOp Op) {
+        private void ProcessItems(AsyncOp Op, string id = null) {
 			if (Op.IsDone) {
                 // MAXST CUSTOM
                 if (Op.Result == null)
@@ -1169,7 +1209,7 @@ namespace UMA
                         // MAXST CUSTOM
                         if (o != null)
                         {
-                            ProcessNewItem(o, true, true);
+                            ProcessNewItem(o, true, true, id);
                         }
                     }
                 }
@@ -1198,7 +1238,7 @@ namespace UMA
             }
         }
 
-        public void ProcessNewItem(UnityEngine.Object result, bool isAddressable, bool keepLoaded)
+        public void ProcessNewItem(UnityEngine.Object result, bool isAddressable, bool keepLoaded, string id = null)
         {
             if (!IsIndexedType(result.GetType())) // JRRM
                 return;
@@ -1206,20 +1246,11 @@ namespace UMA
             // MAXST CUSTOM
             if (isAddressable)
             {
-                ConvertResult(ref result);
+                ConvertResult(ref result, id);
             }
 
             AssetItem resultItem = GetAssetItemForObject(result);
 
-            /*var uuidList = maxstUmaIdList
-                .Where(contain => contain.extension["avatar_resource_name"].Equals(resultItem._Name))
-                .ToList();
-            */
-
-            /*
-            ResourceMeta meta = catalogJsonMetaList
-                .Find(meta => meta.originalFileName.Equals(resultItem._Name));
-            */
             if (resultItem == null)
             {
                 AssetItem ai = new AssetItem(result.GetType(), result);
@@ -1266,42 +1297,45 @@ namespace UMA
         // MAXST CUSTOM
         public string changeAddressableName = "";
         // MAXST CUSTOM
-        private void ConvertResult(ref UnityEngine.Object result)
+        private void ConvertResult(ref UnityEngine.Object result, string id = null)
         {
+            var resId = id == null ? changeAddressableName : id;
+
             if (result is UMAWardrobeRecipe)
             {
                 UMAWardrobeRecipe recipe = result as UMAWardrobeRecipe;
-                ChangeRecipeInfo(ref recipe);
+                ChangeRecipeInfo(ref recipe, resId);
             }
             if (result is SlotDataAsset)
             {
                 SlotDataAsset sd = result as SlotDataAsset;
-                if (!string.IsNullOrEmpty(sd.slotName) && !sd.slotName.Contains(changeAddressableName))
-                    sd.slotName = changeAddressableName;
+                if (!string.IsNullOrEmpty(sd.slotName) && !sd.slotName.Equals(resId))
+                    sd.slotName = resId;
             }
             if (result is OverlayDataAsset)
             {
                 OverlayDataAsset od = result as OverlayDataAsset;
-                if (!string.IsNullOrEmpty(od.overlayName) && !od.overlayName.Contains(changeAddressableName))
-                    od.overlayName = changeAddressableName;
+                if (!string.IsNullOrEmpty(od.overlayName) && !od.overlayName.Equals(resId))
+                    od.overlayName = resId;
             }
         }
         // MAXST CUSTOM
-        private void ChangeRecipeInfo(ref UMAWardrobeRecipe recipe)
+        private void ChangeRecipeInfo(ref UMAWardrobeRecipe recipe, string resId = null)
         {
-            recipe.name = changeAddressableName;
+            var id = resId == null ? changeAddressableName : resId;
+            recipe.name = id;
 
             var packeRecipe = recipe.PackedLoad();
             foreach (var slot in packeRecipe.slotsV3)
             {
-                if (slot != null && !string.IsNullOrEmpty(slot.id) && !slot.id.Contains(changeAddressableName))
+                if (slot != null && !string.IsNullOrEmpty(slot.id) && !slot.id.Equals(id))
                 {
-                    slot.id = changeAddressableName;
+                    slot.id = id;
                     foreach (var overlay in slot.overlays)
                     {
                         if (overlay != null)
                         {
-                            overlay.id = changeAddressableName;
+                            overlay.id = id;
                         }
                     }
                 }

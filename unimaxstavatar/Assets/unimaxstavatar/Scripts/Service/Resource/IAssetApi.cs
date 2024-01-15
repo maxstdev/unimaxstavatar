@@ -9,6 +9,14 @@ namespace Maxst.Resource
     public interface IAssetApi
     {
         [Get("/asset-integration/assets/avatars")]
+        IObservable<List<AvatarResource>> FetchAllAvatarResources(
+        [Header("Authorization")] string accessToken,
+        [Query("mainCategory")] string mainCategory,
+        [Query("os")] string os,
+        [Query("appId")] string appId
+        );
+        
+        [Get("/asset-integration/assets/avatars")]
         IObservable<List<AvatarResource>> FetchAvatarResources(
         [Header("Authorization")] string accessToken,
         [Query("mainCategory")] string mainCategory,

@@ -12,8 +12,15 @@ namespace Maxst.Avatar
     {
         private Dictionary<Category, List<AvatarResource>> avatarResources;
 
+        private string token;
+
         public AvatarResourceService()
         {
+        }
+
+        public void SetToken(string token)
+        {
+            this.token = token;
         }
 
         public async UniTask<string> PostSaveRecipeExtensions(string token, SaveRecipeExtensions saveRecipeExtension)
@@ -64,7 +71,7 @@ namespace Maxst.Avatar
             return await taskCompletionSource.Task;
         }
 
-        public async UniTask<List<AvatarResource>> FetchAvatarResources(string token, string mainCategory, string subCategory, string platformString, string appId)
+        public async UniTask<List<AvatarResource>> FetchAvatarResources(string mainCategory, string subCategory, string platformString, string appId)
         {
             TaskCompletionSource<List<AvatarResource>> avatarResources = new();
             var setting = ResourceSettingSO.Instance;
@@ -89,7 +96,7 @@ namespace Maxst.Avatar
             return await avatarResources.Task;
         }
 
-        public async UniTask<CatalogDownLoadUri> FetchCatalogDownLoadUri(string token, string uri)
+        public async UniTask<CatalogDownLoadUri> FetchCatalogDownLoadUri(string uri)
         {
             TaskCompletionSource<CatalogDownLoadUri> taskCompletionSource = new();
 

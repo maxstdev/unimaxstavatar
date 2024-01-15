@@ -4,6 +4,7 @@ using Maxst.Passport;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UMA;
 using UMA.CharacterSystem;
 using UniRx;
@@ -52,6 +53,8 @@ public class AvatarAddressableManager : MonoBehaviour
     public Subject<List<UMATextRecipe>> addressableloadComplete = new Subject<List<UMATextRecipe>>();
     public Subject<bool> addressableUpdateComplete = new Subject<bool>();
     private AvatarResourceManager avatarResourceManager;
+    public CancellationTokenSource cancellationToken = new();
+    private bool isUpdate;
 
     private Dictionary<string, string> resAppIdDict = new Dictionary<string, string>();
 
@@ -242,12 +245,24 @@ public class AvatarAddressableManager : MonoBehaviour
 
     public async UniTask UpdateCatalogChecked()
     {
-        var updated = await UpdateCatalog();
-        addressableUpdateComplete.OnNext(updated);
+        if (!isUpdate)
+        {
+            isUpdate = true;
+            var updated = await UpdateCatalog();
+
+            isUpdate = false;
+            addressableUpdateComplete.OnNext(updated);
+        }
     }
 
     private async UniTask<bool> UpdateCatalog()
     {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            Debug.Log(" Catalog Update Cancel Return");
+            return false;
+        }
+
         var completionSource = new UniTaskCompletionSource();
 
         List<string> updateCatalogPaths = new List<string>();
@@ -292,6 +307,7 @@ public class AvatarAddressableManager : MonoBehaviour
         }
         else
         {
+            Debug.Log(" Catalog Update check");
             return false;
         }
 

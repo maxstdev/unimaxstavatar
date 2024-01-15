@@ -6,11 +6,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UMA;
 using UMA.CharacterSystem;
 using UniRx;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
+using static Maxst.Avatar.UserAvatar;
 
 
 namespace Maxst.Avatar
@@ -172,7 +173,7 @@ namespace Maxst.Avatar
                        categoryAreaUI.categoryWardrobeslot.Value, value, presetList));
                })
                .AddTo(this);
-
+            
             colorAreaUI.getDefaultColor = () =>
             {
                 Color initcolor = new Color();
@@ -201,11 +202,14 @@ namespace Maxst.Avatar
             assetAreaUI.slotname
                 .Subscribe(name =>
                 {
-                    if (isResourceFullLoad)
+                    var currentslot = categoryAreaUI.categoryWardrobeslot.Value;
+
+                    if (isResourceFullLoad || IsLocalSlot(currentslot))
                     {
                         DressUpAvatar(assetData.GetTextRecipe(name));
                     }
-                    else {
+                    else
+                    {
                         DressUpAvatarAsync(name).Forget();
                     }
                 });
@@ -247,13 +251,13 @@ namespace Maxst.Avatar
                 var loadOjbect = await addressableloader.AsyncEachTask(selectRes);
                 foreach (var item in loadOjbect)
                 {
-                    if(item as UMAWardrobeRecipe)
+                    if (item as UMAWardrobeRecipe)
                     {
                         slotitem = item as UMATextRecipe;
                     }
                 }
             }
-            
+
             return slotitem;
         }
 
@@ -264,7 +268,7 @@ namespace Maxst.Avatar
             var avatarRes = avatarResourceManager.GetAvatarResources();
             var publicRes = avatarResourceManager.GetPublicResources();
             var saveRes = avatarResourceManager.GetSaveAvatarResources();
-            
+
             result.AddRange(avatarRes.Values.SelectMany(list => list));
             result.AddRange(publicRes.Values.SelectMany(list => list));
             var notContainRes = saveRes.Values.SelectMany(list => list)
@@ -276,18 +280,25 @@ namespace Maxst.Avatar
 
         private void OnAdjust(ViewType viewType)
         {
-            Debug.Log($"[MaxstAvatarCustom] OnAdjust : {viewType}");
             switch (viewType)
             {
-                case ViewType.Face_Hair:
-                case ViewType.Face_Eyebrows:
+                case ViewType.Hair:
                     actionList.ResetActionList();
                     SetActives(false, actionList.gameObject, resultArea.gameObject);
                     SetActives(true, VisibleObjects);
                     avatarAreaUI.SetActiveCloseImg(true);
                     avatarAreaUI.SetSpriteCloseImg();
-                    colorAreaUI.transform.parent.gameObject.SetActive(true);
                     SetBackgroundGradient(true);
+                    colorAreaUI.transform.parent.gameObject.SetActive(true);
+                    break;
+                case ViewType.Face:
+                    actionList.ResetActionList();
+                    SetActives(false, actionList.gameObject, resultArea.gameObject);
+                    SetActives(true, VisibleObjects);
+                    avatarAreaUI.SetActiveCloseImg(true);
+                    avatarAreaUI.SetSpriteCloseImg();
+                    SetBackgroundGradient(true);
+                    colorAreaUI.transform.parent.gameObject.SetActive(false);
                     break;
                 case ViewType.Body:
                     actionList.ResetActionList();
@@ -473,6 +484,7 @@ namespace Maxst.Avatar
         public void RedoAvatar()
         {
             undoRedoManager.Redo();
+            UndoSelectUI();
         }
 
         private async void LoadScrollerDataFromAsset(string value, List<string> showResAppIds)
@@ -502,22 +514,47 @@ namespace Maxst.Avatar
 
             list.ForEach(slot =>
             {
-                var isSelected = false;
-                foreach (var each in Avatar.WardrobeRecipes)
-                {
-                    if (slot.recipeString.Equals(each.Value.recipeString))
-                    {
-                        isSelected = true;
-                        break;
-                    }
-                }
-                
-                assetAreaUI.CreateAssetItem(slot.slotName, slot.thumbnail, isSelected);
+                CreateAssetItem(slot);
             });
         }
 
-        private async void LoadScrollDataFromResourceServer(string value, List<string> showResAppIds)
+        private bool IsCurrentFaceSlot(string slot)
         {
+            return ViewType.Face.ToString().Equals(slot);
+        }
+        private bool IsLocalSlot(string slot)
+        {
+            return AvatarWardrobeSlot.Set.ToString().Equals(slot)
+                || AvatarWardrobeSlot.Face.ToString().Equals(slot);
+        }
+
+        private void CreateAssetItem(AssetAreaData slot) {
+            var isSelected = false;
+            foreach (var each in Avatar.WardrobeRecipes)
+            {
+                if (slot.recipeString.Equals(each.Value.recipeString))
+                {
+                    isSelected = true;
+                    break;
+                }
+            }
+            assetAreaUI.CreateAssetItem(slot.resId, slot.thumbnail, isSelected);
+        }
+
+        private async void LoadScrollDataFromResourceServer(string slot, List<string> showResAppIds)
+        {
+            if (IsLocalSlot(slot))
+            {
+                var temp = assetData.GetAssetData(slot);
+                assetAreaUI.DeleteAllItem();
+
+                temp.ForEach(slot =>
+                {
+                    CreateAssetItem(slot);
+                });
+                return;
+            }
+
             await addressableloader.UpdateCatalogChecked();
 
             var list = new List<AssetAreaData>();
@@ -526,7 +563,7 @@ namespace Maxst.Avatar
             assetAreaUI.DeleteAllItem();
 
             var resources = GetAvatarResouces();
-            var slotResource = resources.Where(res => res.subCategory.Equals(value));
+            var slotResource = resources.Where(res => res.subCategory.Equals(slot));
 
             foreach (var res in slotResource)
             {
@@ -589,7 +626,15 @@ namespace Maxst.Avatar
         private void UndoSelectUI()
         {
 #if true
-            LoadScrollDataFromResourceServer(categoryAreaUI.categoryWardrobeslot.Value, avatarResourceManager.GetVisibleResAppIds());
+            if (Avatar.WardrobeRecipes.ContainsKey(categoryAreaUI.categoryWardrobeslot.Value))
+            {
+                var slot = Avatar.WardrobeRecipes[categoryAreaUI.categoryWardrobeslot.Value];
+                assetAreaUI.ItemSelectChange(assetAreaUI.GetItem(slot.name));
+            }
+            else
+            {
+                assetAreaUI.ItemSelectChange();
+            }
 #else
             LoadScrollerDataFromAsset(categoryAreaUI.categoryWardrobeslot.Value, avatarResourceManager.GetVisibleResAppIds());
 #endif

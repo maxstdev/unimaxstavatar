@@ -11,5 +11,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/unimaxstavatar/Scenes/AvatarScene.unity
     guid: 5ceced8b7ef0af347b14956f831fa197
+  - enabled: 1
+    path: Assets/unimaxstavatar/Scenes/MultiAvatarScene.unity
+    guid: ce1e2d92e1d613a49b87f70de06752fd
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: e440a5793c684264bb83bdf7aadd8930, type: 2}

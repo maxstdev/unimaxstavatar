@@ -40,6 +40,8 @@ namespace UMA
 		[SerializeField]
 		public UMAPredefinedDNA OverrideDNA = new UMAPredefinedDNA();
 
+        public SlotStatus nakedstatus = SlotStatus.Show;
+        public MaxstWardrobeSlot MaxstWardrobeSlot => (MaxstWardrobeSlot)Enum.Parse(typeof(MaxstWardrobeSlot), wardrobeSlot);
 
 #if UNITY_EDITOR
 		/// <summary>

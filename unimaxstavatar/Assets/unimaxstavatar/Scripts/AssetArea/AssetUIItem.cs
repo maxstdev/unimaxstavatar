@@ -43,8 +43,10 @@ namespace Maxst.Avatar
 
         public void SetData(string thumbailpath)
         {
-            Dictionary<string, string> token = new();
-            token.Add("token", "Bearer " + TokenRepo.Instance.GetToken().accessToken);
+            Dictionary<string, string> token = new()
+            {
+                { "token", "Bearer " + TokenRepo.Instance.GetToken().accessToken }
+            };
 
             Davinci.get().load(thumbailpath).setFadeTime(0)
                         .SetHeaders(token)
