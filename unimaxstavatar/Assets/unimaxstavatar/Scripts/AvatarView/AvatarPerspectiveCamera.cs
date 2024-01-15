@@ -103,8 +103,8 @@ namespace Maxst.Avatar
             var avatarCameraAnimationSO = AvatarCameraAnimationSO.Instance;
             switch (viewType)
             {
-                case ViewType.Face_Eyebrows:
-                case ViewType.Face_Hair:
+                case ViewType.Face:
+                case ViewType.Hair:
                     DOPath(avatarCameraAnimationSO.FacePosition, avatarCameraAnimationSO.FaceWaypoint);
                     break;
                 case ViewType.Body:

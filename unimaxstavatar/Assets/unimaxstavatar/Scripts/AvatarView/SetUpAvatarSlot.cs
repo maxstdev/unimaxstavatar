@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Linq;
 using UMA;
 using UMA.CharacterSystem;
 
@@ -10,7 +13,7 @@ namespace Maxst.Avatar
         private UMATextRecipe recipe;
         private List<UMATextRecipe> recipeList;
         private List<UMATextRecipe> previousRecipeList = new List<UMATextRecipe>();
-
+        private List<UMATextRecipe> executeList;
 
         public SetUpAvatarSlot(DynamicCharacterAvatar avatar, UMATextRecipe recipe, List<UMATextRecipe> list)
         {
@@ -19,11 +22,28 @@ namespace Maxst.Avatar
             recipeList = list;
         }
 
+        private void MakeExecuteList()
+        {
+            NakedCheker nakedchecker = new NakedCheker();
+
+            executeList = new List<UMATextRecipe>();
+            foreach (var recipe in nakedchecker.GetNakedList(recipeList))
+            {
+                if (recipe.nakedstatus == SlotStatus.Hide)
+                {
+                    continue;
+                }
+
+                executeList.Add(recipe);
+            }
+        }
 
         public void Execute()
         {
             previousRecipeList.AddRange(recipeList);
             RefreshCheck();
+
+            MakeExecuteList();
 
             SetAvatar();
         }
@@ -45,6 +65,8 @@ namespace Maxst.Avatar
             recipeList.Clear();
             recipeList.AddRange(previousRecipeList);
 
+            MakeExecuteList();
+
             SetAvatar();
         }
 
@@ -52,7 +74,7 @@ namespace Maxst.Avatar
         {
             avatar.ClearSlots();
 
-            recipeList?.ForEach(recipe =>
+            executeList?.ForEach(recipe =>
             {
                 avatar.SetSlot(recipe);
             });

@@ -1,40 +1,39 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System;
-using UnityEngine;
+using UMA.CharacterSystem;
 
 namespace Maxst.Avatar
 {
     [Serializable]
     public class UserAvatar
     {
+        [JsonProperty("id")]
+        public string id;
+
         [JsonProperty("recipeStr")]
-        [SerializeField]
         public string recipeStr;
 
         [JsonProperty("slots")]
-        [SerializeField]
         public List<Slot> slots;
+
+        public DynamicCharacterAvatar avatar { get; set; }
 
         public class Slot
         {
             [JsonProperty("slot")]
-            [SerializeField]
             public string slot;
 
             [JsonProperty("itemId")]
-            [SerializeField]
             public long itemId;
 
             [JsonProperty("recipe")]
-            [SerializeField]
             public string recipe;
 
             [JsonProperty("imageUri")]
             public string imageUri;
 
             [JsonProperty("assetResourceInfo")]
-            [SerializeField]
             public List<Resource> assetResourceInfo;
 
             public ThumbnailDownLoadUri thumbnailDownLoadUri;

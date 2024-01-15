@@ -3,8 +3,8 @@ namespace Maxst.Avatar
     public enum ViewType
     {
         None,
-        Face_Eyebrows,
-        Face_Hair,
+        Face,
+        Hair,
         Body,
         Animation,
         Result

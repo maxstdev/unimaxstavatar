@@ -26,6 +26,7 @@ namespace UMA.CharacterSystem
     {
         //MAXST_CUSTOM
         private string loadRecipeString = null;
+        
         private List<UMATextRecipe> defaultTextRecipe;
         public List<UMATextRecipe> DefaultTextRecipe
         {
@@ -445,17 +446,19 @@ namespace UMA.CharacterSystem
         }
 
         //MAXST CUSTOM
+        public void SetRecipeString(string recipeString) {
+            loadRecipeString = recipeString;
+        }
+
         public void SetDefaultTextRecipe(List<UMATextRecipe> defaultTextRecipe, string recipeString = null)
         {
-            if (!recipeString.IsNullOrEmpty()) loadRecipeString = recipeString;
+            if (!recipeString.IsNullOrEmpty()) SetRecipeString(recipeString);
+
+            DefaultTextRecipe = defaultTextRecipe;
 
             if (IsAvatarSaveData())
             {
                 MaxstDoLoad();
-            }
-            else
-            {
-                DefaultTextRecipe = defaultTextRecipe;
             }
         }
 
@@ -2530,9 +2533,7 @@ namespace UMA.CharacterSystem
             return currentRecipeString;
         }
 
-        //MAXST CUSTOM
-        public string MaxstDoSave(bool saveAsAsset = false, SaveOptions customSaveOptions = SaveOptions.useDefaults)
-        {
+        private UMADynamicCharacterAvatarRecipe GetAsset(bool saveAsAsset = false, SaveOptions customSaveOptions = SaveOptions.useDefaults) {
             var saveOptionsToUse = customSaveOptions == SaveOptions.useDefaults ? defaultSaveOptions : customSaveOptions;
             Dictionary<string, UMATextRecipe> wardrobeCache = new Dictionary<string, UMATextRecipe>(_wardrobeRecipes);
             Dictionary<string, UMAWardrobeCollection> wcCache = new Dictionary<string, UMAWardrobeCollection>(_wardrobeCollections);
@@ -2547,7 +2548,18 @@ namespace UMA.CharacterSystem
 
             savePathType = origSaveType;
             //var asset = ScriptableObject.CreateInstance<UMATextRecipe>();
-            var asset = ScriptableObject.CreateInstance<UMADynamicCharacterAvatarRecipe>();
+            return ScriptableObject.CreateInstance<UMADynamicCharacterAvatarRecipe>();
+        }
+
+        //MAXST CUSTOM
+        public string MaxstDoSave(bool saveAsAsset = false, SaveOptions customSaveOptions = SaveOptions.useDefaults)
+        {
+            var saveOptionsToUse = customSaveOptions == SaveOptions.useDefaults ? defaultSaveOptions : customSaveOptions;
+            Dictionary<string, UMATextRecipe> wardrobeCache = new Dictionary<string, UMATextRecipe>(_wardrobeRecipes);
+            Dictionary<string, UMAWardrobeCollection> wcCache = new Dictionary<string, UMAWardrobeCollection>(_wardrobeCollections);
+            var prevSharedColors = umaData.umaRecipe.sharedColors;//not sure if this is gonna work
+            
+            var asset = GetAsset(saveAsAsset, customSaveOptions);
             var recipeName = saveFilename != "" ? saveFilename : gameObject.name + "_DCSRecipe";
             asset.SaveDCS(this, recipeName, saveOptionsToUse);
 

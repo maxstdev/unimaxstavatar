@@ -52,8 +52,9 @@ namespace Maxst.Avatar
         {
             return slot switch
             {
-                "Eyebrows" => ViewType.Face_Eyebrows,
-                "Hair" => ViewType.Face_Hair,
+                "Eyebrows" => ViewType.Face,
+                "Face" => ViewType.Face,
+                "Hair" => ViewType.Hair,
                 _ => ViewType.Body
             };
         }

@@ -2,7 +2,7 @@ using System;
 
 namespace Maxst.Avatar
 {
-    public enum Category { Chest, Hair, Legs, Feet }
+    public enum Category { Face ,Chest, Hair, Legs, Set, Feet, Undertop, Underbottom }
 
     public static class CategoryHelper
     {

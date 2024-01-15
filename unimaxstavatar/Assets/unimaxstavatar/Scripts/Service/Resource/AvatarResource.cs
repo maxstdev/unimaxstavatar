@@ -32,19 +32,5 @@ namespace Maxst.Avatar
         public string createdAt;
 
         public ThumbnailDownLoadUri thumbnailDownLoadUri;
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is AvatarResource))
-            {
-                return false;
-            }
-            return id == ((AvatarResource)obj).id;
-        }
-
-        public override int GetHashCode()
-        {
-            return id.GetHashCode();
-        }
     }
 }

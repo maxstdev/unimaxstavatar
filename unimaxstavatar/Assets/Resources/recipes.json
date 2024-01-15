@@ -1,0 +1,672 @@
+[
+    {
+        "id": "1",
+        "recipeStr": "{\"packedRecipeType\":\"DynamicCharacterAvatar\",\"name\":\"Dynamic BaseAvatar_DCSRecipe\",\"race\":\"BaseAvatar\",\"dna\":[],\"characterColors\":[{\"name\":\"Hair\",\"colors\":[255,199,31,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0],\"ShaderParms\":[],\"alwaysUpdate\":false}],\"wardrobeSet\":[{\"slot\":\"Eyebrows\",\"recipe\":\"FACP_00_Eyebrows_01_Recipe\"},{\"slot\":\"Underbottom\",\"recipe\":\"UNDER_bottom_Recipe\"},{\"slot\":\"Undertop\",\"recipe\":\"UNDER_top_Recipe\"},{\"slot\":\"Hair\",\"recipe\":\"27\"},{\"slot\":\"Legs\",\"recipe\":\"203\"},{\"slot\":\"Feet\",\"recipe\":\"24\"},{\"slot\":\"Chest\",\"recipe\":\"192\"}],\"raceAnimatorController\":\"AnimationController\"}",
+        "slots": [
+            {
+                "slot": "Chest",
+                "itemId": 192,
+                "recipe": "TOR_00_BasicTshirt_05",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/192/078ed838-a8a3-47d3-99ef-a41b3aaa40ad",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/192/Android/82e8036b-3a8a-4288-a2a8-df8ce2c39127",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/192/Android/42c077b1-5bde-4045-90a9-6adf27b92571",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/192/Android/328a2da8-80c0-4084-9219-a7b806b24661"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/192/iOS/65b590a4-687e-4cc2-bbac-7e8a9f2936fa",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/192/iOS/f0787e55-ab0e-4f81-a188-d8ad8531f232",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/192/iOS/93900fbb-a268-47db-8369-452c4e30712e"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/192/StandaloneWindows64/b80cf8c8-9074-41f3-b024-f0af447711b0",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/192/StandaloneWindows64/2de0e527-4c31-497f-bbce-b861dc2e50f1",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/192/StandaloneWindows64/3bd15b7d-2418-4606-a8f1-130c8f1dd59b"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Feet",
+                "itemId": 24,
+                "recipe": "FEE_01_Boots_01",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/24/a5572a44-e533-414d-8a63-0bfcc965500e",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/24/Android/a2c95902-1603-4da5-a9d6-2b5bdedb3e68",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/24/Android/461844d2-c9a9-4b5b-8e06-10f8594cabc9",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/24/Android/620140f2-dcd2-42ea-9564-9bb5d2f147b4"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/24/iOS/c4773efe-d2d1-4297-95c1-69a45a745f51",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/24/iOS/8fa49526-f5b7-48e7-b1c9-b0bac4005001",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/24/iOS/5d02d0b2-e9e4-4a28-b548-839adf6671d7"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/24/StandaloneWindows64/268df84b-9955-46c2-9b51-2000b7b33a40",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/24/StandaloneWindows64/e3d43deb-26c6-4f39-9095-1b80c7a825bc",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/24/StandaloneWindows64/c8950cb3-edab-44da-a1e1-52fcc33162d2"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Legs",
+                "itemId": 203,
+                "recipe": "LEG_00_Shorts_06",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/203/3f356c6c-ccaf-42ab-9923-3176d7f584b6",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/203/Android/78d180a8-26c4-4e9b-83eb-971f933c2cff",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/203/Android/4ce57ff1-9e09-4977-b1ef-c3d8a877cf5a",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/203/Android/ca2dddec-3864-42e1-844a-2fabe49316bf"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/203/iOS/6db1a7fc-a2d2-49ce-b7cd-b9f7766e95ef",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/203/iOS/5c2cb85c-7efa-485d-afc5-b53fdcb73477",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/203/iOS/1e690b73-136c-4ee8-ae95-4b5e6fe446ab"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/203/StandaloneWindows64/30fd8b94-7155-4921-a7f2-044f435faaf9",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/203/StandaloneWindows64/b5be49a6-d5e6-4730-a525-8206c027b1dd",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/203/StandaloneWindows64/44bb5473-30e5-48da-a802-ee9b26dc907d"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Hair",
+                "itemId": 27,
+                "recipe": "HAI_60_BoyShort_01",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/27/b582552c-c1a0-48fe-83e4-20435ecb6a3e",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/27/Android/527a6f39-439b-43ce-b1c9-d67a19a9b845",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/27/Android/46ad3343-b7ec-435a-9008-a6af96d1bf16",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/27/Android/31ee6605-ee89-4317-b43f-7e61eee6c4e7"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/27/iOS/16cd48d7-e269-4370-b874-e1078325704e",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/27/iOS/c029d99f-0e70-4fc0-9f5c-dd8a1b75b72d",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/27/iOS/f85e38ac-ea93-446e-859e-a154062ea5dc"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/27/StandaloneWindows64/abd007a4-891d-418c-8176-9b07d106f33b",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/27/StandaloneWindows64/20582068-2e4e-487d-b71d-5103df66e792",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/27/StandaloneWindows64/8e242203-8a2f-4bb6-a328-82a3f915f03d"
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "2",
+        "recipeStr": "{\"packedRecipeType\":\"DynamicCharacterAvatar\",\"name\":\"Dynamic BaseAvatar_DCSRecipe\",\"race\":\"BaseAvatar\",\"dna\":[],\"characterColors\":[{\"name\":\"Hair\",\"colors\":[62,70,90,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0],\"ShaderParms\":[],\"alwaysUpdate\":false}],\"wardrobeSet\":[{\"slot\":\"Eyebrows\",\"recipe\":\"FACP_00_Eyebrows_01_Recipe\"},{\"slot\":\"Underbottom\",\"recipe\":\"UNDER_bottom_Recipe\"},{\"slot\":\"Undertop\",\"recipe\":\"UNDER_top_Recipe\"},{\"slot\":\"Hair\",\"recipe\":\"27\"},{\"slot\":\"Legs\",\"recipe\":\"212\"},{\"slot\":\"Feet\",\"recipe\":\"24\"},{\"slot\":\"Chest\",\"recipe\":\"214\"}],\"raceAnimatorController\":\"AnimationController\"}",
+        "slots": [
+            {
+                "slot": "Chest",
+                "itemId": 214,
+                "recipe": "TOR_01_Jacket_04",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/214/97026a64-49cc-4880-b0db-cb72c6e1d500",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/214/Android/725b1d4e-4035-4ac3-9104-f505335e0443",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/214/Android/9c027484-b202-4c0d-b9a5-9c5287147453",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/214/Android/381691d8-f2b4-43b9-93a8-5f1413a2538b"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/214/iOS/dc5a0496-7bcd-44ae-afa5-4239668dd0e2",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/214/iOS/6d6fe50d-ae24-46b3-b031-6e7d51996f73",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/214/iOS/f0c7b01e-f981-4c14-bb67-95024780b65b"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/214/StandaloneWindows64/d01deda5-cf03-4c9c-bd6e-7bc3f91b79b9",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/214/StandaloneWindows64/322b8292-10d7-43f1-ada3-b590c5c2dadd",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/214/StandaloneWindows64/800d00ec-ff0d-4bc7-a200-9b59f53fdce4"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Feet",
+                "itemId": 24,
+                "recipe": "FEE_01_Boots_01",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/24/a5572a44-e533-414d-8a63-0bfcc965500e",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/24/Android/a2c95902-1603-4da5-a9d6-2b5bdedb3e68",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/24/Android/461844d2-c9a9-4b5b-8e06-10f8594cabc9",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/24/Android/620140f2-dcd2-42ea-9564-9bb5d2f147b4"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/24/iOS/c4773efe-d2d1-4297-95c1-69a45a745f51",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/24/iOS/8fa49526-f5b7-48e7-b1c9-b0bac4005001",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/24/iOS/5d02d0b2-e9e4-4a28-b548-839adf6671d7"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/24/StandaloneWindows64/268df84b-9955-46c2-9b51-2000b7b33a40",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/24/StandaloneWindows64/e3d43deb-26c6-4f39-9095-1b80c7a825bc",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/24/StandaloneWindows64/c8950cb3-edab-44da-a1e1-52fcc33162d2"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Legs",
+                "itemId": 212,
+                "recipe": "LEG_01_Trousers_02",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/212/eb81d7fc-f456-4430-b635-a2c2d7d5b8a0",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/212/Android/d55cabc4-7aa4-4bae-bc25-3f8fbf8f8978",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/212/Android/bb5c8ea0-f58f-4985-aeb6-58c8ad5b6037",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/212/Android/f6662bf8-4e0f-4c0c-8a38-bee9646c3882"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/212/iOS/7293bed6-67ce-42c0-891e-2fd6450f291d",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/212/iOS/e9d0c810-d16f-48b7-984f-35f8dc535ea7",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/212/iOS/c62610cb-08cd-4eab-be55-68ba263c78ae"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/212/StandaloneWindows64/c5cfc9e6-cd9c-4108-9f68-ad38966a95ba",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/212/StandaloneWindows64/0d976f73-c75c-4276-9704-c5a4f6b8b54e",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/212/StandaloneWindows64/2a313cc3-e93d-4965-9250-922840346ee7"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Hair",
+                "itemId": 27,
+                "recipe": "HAI_60_BoyShort_01",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/27/b582552c-c1a0-48fe-83e4-20435ecb6a3e",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/27/Android/527a6f39-439b-43ce-b1c9-d67a19a9b845",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/27/Android/46ad3343-b7ec-435a-9008-a6af96d1bf16",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/27/Android/31ee6605-ee89-4317-b43f-7e61eee6c4e7"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/27/iOS/16cd48d7-e269-4370-b874-e1078325704e",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/27/iOS/c029d99f-0e70-4fc0-9f5c-dd8a1b75b72d",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/27/iOS/f85e38ac-ea93-446e-859e-a154062ea5dc"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/27/StandaloneWindows64/abd007a4-891d-418c-8176-9b07d106f33b",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/27/StandaloneWindows64/20582068-2e4e-487d-b71d-5103df66e792",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/27/StandaloneWindows64/8e242203-8a2f-4bb6-a328-82a3f915f03d"
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "3",
+        "recipeStr": "{\"packedRecipeType\":\"DynamicCharacterAvatar\",\"name\":\"Dynamic BaseAvatar_DCSRecipe\",\"race\":\"BaseAvatar\",\"dna\":[],\"characterColors\":[{\"name\":\"Hair\",\"colors\":[198,221,0,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0],\"ShaderParms\":[],\"alwaysUpdate\":false}],\"wardrobeSet\":[{\"slot\":\"Eyebrows\",\"recipe\":\"FACP_00_Eyebrows_01_Recipe\"},{\"slot\":\"Underbottom\",\"recipe\":\"UNDER_bottom_Recipe\"},{\"slot\":\"Undertop\",\"recipe\":\"UNDER_top_Recipe\"},{\"slot\":\"Hair\",\"recipe\":\"27\"},{\"slot\":\"Legs\",\"recipe\":\"206\"},{\"slot\":\"Feet\",\"recipe\":\"241\"},{\"slot\":\"Chest\",\"recipe\":\"216\"}],\"raceAnimatorController\":\"AnimationController\"}",
+        "slots": [
+            {
+                "slot": "Chest",
+                "itemId": 216,
+                "recipe": "TOR_01_Jacket_05",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/216/bd47b164-f4a7-416f-ad3b-ac3e402e8431",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/216/Android/89a741bf-a5e2-4736-aa8e-4be125d260b0",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/216/Android/db31407b-a280-4edf-9be8-7eb41eeaa91d",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/216/Android/a0ad4c2e-8818-4162-94f2-7f2bfdd36db3"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/216/iOS/4babeac6-583c-4f64-a306-3daf74214683",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/216/iOS/5233bd53-231c-4a98-85ce-28cde2662a12",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/216/iOS/6604e656-c4cf-45d2-aafc-c21109405d1a"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/216/StandaloneWindows64/003d2230-d077-4b22-91b0-759c9c27af8c",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/216/StandaloneWindows64/201d926f-2710-48da-9bfb-4ff6c25f6d3d",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/216/StandaloneWindows64/8ccd559f-f1ca-46c5-ba3a-b1a099b10087"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Feet",
+                "itemId": 241,
+                "recipe": "FEE_01_Sneakers_06",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/241/c75c30d5-9b46-449a-a9d9-8abcb22e10f9",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/241/Android/2267d7b4-2e55-4e1b-a301-e569ab88701d",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/241/Android/04b42217-86c7-4147-aca6-9f83ee0abb22",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/241/Android/0062a47e-8fb4-4b92-8936-2689e17d88ca"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/241/iOS/2d43731f-9cda-4545-81f0-f4040c3a7865",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/241/iOS/918d14ca-7fb2-46b4-9b4f-34bd8de9892b",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/241/iOS/d8326d92-7243-4781-ae6e-aef38d54eecc"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/241/StandaloneWindows64/89d42692-b5f1-4483-bac8-9088d10b3029",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/241/StandaloneWindows64/aef00784-a76a-4f08-a975-5ed5f626658c",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/241/StandaloneWindows64/d1e7caff-a0b3-4f6d-afb6-2d17ecccb4a2"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Legs",
+                "itemId": 206,
+                "recipe": "LEG_01_GymPants_04",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/206/48806f83-e48d-4f41-bf82-aa575404600f",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/206/Android/2e8b2931-ff68-4da0-8d4b-210d0cb407d5",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/206/Android/0bc0be7d-cbf3-40fb-9248-1a841cbe641d",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/206/Android/59b2eb3b-8b64-40fc-a462-f24c9585d670"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/206/iOS/fb9056f1-dec0-429b-a40f-ad5bd6104e2e",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/206/iOS/79d66312-88f3-4ce6-9821-881250d8a4a4",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/206/iOS/d179d32b-85bc-4d58-8c84-d39e732e0df7"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/206/StandaloneWindows64/c11e88d5-f762-4f2d-a2a9-09cdf5c52fb0",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/206/StandaloneWindows64/0d628dc6-984e-49b2-bc68-aa5c74a0043d",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/206/StandaloneWindows64/013bf9b0-c31e-4e07-8ab4-098bc1307b9d"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Hair",
+                "itemId": 27,
+                "recipe": "HAI_60_BoyShort_01",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/27/b582552c-c1a0-48fe-83e4-20435ecb6a3e",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/27/Android/527a6f39-439b-43ce-b1c9-d67a19a9b845",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/27/Android/46ad3343-b7ec-435a-9008-a6af96d1bf16",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/27/Android/31ee6605-ee89-4317-b43f-7e61eee6c4e7"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/27/iOS/16cd48d7-e269-4370-b874-e1078325704e",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/27/iOS/c029d99f-0e70-4fc0-9f5c-dd8a1b75b72d",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/27/iOS/f85e38ac-ea93-446e-859e-a154062ea5dc"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/27/StandaloneWindows64/abd007a4-891d-418c-8176-9b07d106f33b",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/27/StandaloneWindows64/20582068-2e4e-487d-b71d-5103df66e792",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/27/StandaloneWindows64/8e242203-8a2f-4bb6-a328-82a3f915f03d"
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "4",
+        "recipeStr": "{\"packedRecipeType\":\"DynamicCharacterAvatar\",\"name\":\"Dynamic BaseAvatar_DCSRecipe\",\"race\":\"BaseAvatar\",\"dna\":[],\"characterColors\":[{\"name\":\"Hair\",\"colors\":[198,221,0,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0],\"ShaderParms\":[],\"alwaysUpdate\":false}],\"wardrobeSet\":[{\"slot\":\"Eyebrows\",\"recipe\":\"FACP_00_Eyebrows_01_Recipe\"},{\"slot\":\"Underbottom\",\"recipe\":\"UNDER_bottom_Recipe\"},{\"slot\":\"Undertop\",\"recipe\":\"UNDER_top_Recipe\"},{\"slot\":\"Hair\",\"recipe\":\"28\"},{\"slot\":\"Legs\",\"recipe\":\"206\"},{\"slot\":\"Feet\",\"recipe\":\"241\"},{\"slot\":\"Chest\",\"recipe\":\"192\"}],\"raceAnimatorController\":\"AnimationController\"}",
+        "slots": [
+            {
+                "slot": "Chest",
+                "itemId": 192,
+                "recipe": "TOR_00_BasicTshirt_05",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/192/078ed838-a8a3-47d3-99ef-a41b3aaa40ad",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/192/Android/82e8036b-3a8a-4288-a2a8-df8ce2c39127",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/192/Android/42c077b1-5bde-4045-90a9-6adf27b92571",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/192/Android/328a2da8-80c0-4084-9219-a7b806b24661"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/192/iOS/65b590a4-687e-4cc2-bbac-7e8a9f2936fa",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/192/iOS/f0787e55-ab0e-4f81-a188-d8ad8531f232",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/192/iOS/93900fbb-a268-47db-8369-452c4e30712e"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/192/StandaloneWindows64/b80cf8c8-9074-41f3-b024-f0af447711b0",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/192/StandaloneWindows64/2de0e527-4c31-497f-bbce-b861dc2e50f1",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/192/StandaloneWindows64/3bd15b7d-2418-4606-a8f1-130c8f1dd59b"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Feet",
+                "itemId": 241,
+                "recipe": "FEE_01_Sneakers_06",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/241/c75c30d5-9b46-449a-a9d9-8abcb22e10f9",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/241/Android/2267d7b4-2e55-4e1b-a301-e569ab88701d",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/241/Android/04b42217-86c7-4147-aca6-9f83ee0abb22",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/241/Android/0062a47e-8fb4-4b92-8936-2689e17d88ca"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/241/iOS/2d43731f-9cda-4545-81f0-f4040c3a7865",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/241/iOS/918d14ca-7fb2-46b4-9b4f-34bd8de9892b",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/241/iOS/d8326d92-7243-4781-ae6e-aef38d54eecc"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/241/StandaloneWindows64/89d42692-b5f1-4483-bac8-9088d10b3029",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/241/StandaloneWindows64/aef00784-a76a-4f08-a975-5ed5f626658c",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/241/StandaloneWindows64/d1e7caff-a0b3-4f6d-afb6-2d17ecccb4a2"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Legs",
+                "itemId": 206,
+                "recipe": "LEG_01_GymPants_04",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/206/48806f83-e48d-4f41-bf82-aa575404600f",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/206/Android/2e8b2931-ff68-4da0-8d4b-210d0cb407d5",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/206/Android/0bc0be7d-cbf3-40fb-9248-1a841cbe641d",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/206/Android/59b2eb3b-8b64-40fc-a462-f24c9585d670"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/206/iOS/fb9056f1-dec0-429b-a40f-ad5bd6104e2e",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/206/iOS/79d66312-88f3-4ce6-9821-881250d8a4a4",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/206/iOS/d179d32b-85bc-4d58-8c84-d39e732e0df7"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/206/StandaloneWindows64/c11e88d5-f762-4f2d-a2a9-09cdf5c52fb0",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/206/StandaloneWindows64/0d628dc6-984e-49b2-bc68-aa5c74a0043d",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/206/StandaloneWindows64/013bf9b0-c31e-4e07-8ab4-098bc1307b9d"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Hair",
+                "itemId": 28,
+                "recipe": "HAI_60_GirlCurly_01",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/28/57a81133-5c79-4463-959e-2241b6d814fa",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/28/Android/748595b8-7921-4da8-b787-b0cdd43dcaef",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/28/Android/9fec1f07-23d4-4d4d-a6a0-931836204ed9",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/28/Android/95d23051-be70-43eb-924b-bd853754473a"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/28/iOS/2cfeb78e-5dab-4e20-9223-e68a35373e28",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/28/iOS/1c2a8168-f510-4916-ba9f-9778eebaeb8e",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/28/iOS/3a8057f0-dc7c-433e-a31b-d5f0ca3494b8"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/28/StandaloneWindows64/e3c9c631-017e-46b0-a62f-96acb77a5235",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/28/StandaloneWindows64/6f5ccf7c-8b13-413a-88e3-3e9ca96042f5",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/28/StandaloneWindows64/dc941f7e-fa05-41cb-97f6-4f835b2cceb4"
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "5",
+        "recipeStr": "{\"packedRecipeType\":\"DynamicCharacterAvatar\",\"name\":\"Dynamic BaseAvatar_DCSRecipe\",\"race\":\"BaseAvatar\",\"dna\":[],\"characterColors\":[{\"name\":\"Hair\",\"colors\":[198,221,0,255,0,0,0,0,255,255,255,255,0,0,0,0,255,255,255,255,0,0,0,0],\"ShaderParms\":[],\"alwaysUpdate\":false}],\"wardrobeSet\":[{\"slot\":\"Eyebrows\",\"recipe\":\"FACP_00_Eyebrows_01_Recipe\"},{\"slot\":\"Underbottom\",\"recipe\":\"UNDER_bottom_Recipe\"},{\"slot\":\"Undertop\",\"recipe\":\"UNDER_top_Recipe\"},{\"slot\":\"Hair\",\"recipe\":\"28\"},{\"slot\":\"Legs\",\"recipe\":\"209\"},{\"slot\":\"Feet\",\"recipe\":\"241\"},{\"slot\":\"Chest\",\"recipe\":\"225\"}],\"raceAnimatorController\":\"AnimationController\"}",
+        "slots": [
+            {
+                "slot": "Chest",
+                "itemId": 225,
+                "recipe": "TOR_01_LongSleeves_05",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/225/6cedab92-301f-44fa-957e-10ee3a9f42b2",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/225/Android/efd4d4cd-d280-46ad-b5f2-84646fa799f1",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/225/Android/c7af3c1d-f524-4d3c-9815-e8a24ca9f561",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/225/Android/6cbea214-5454-4e82-81ff-2c7172a7a06d"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/225/iOS/305ffb12-df5f-49b6-9492-654a5b17fddf",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/225/iOS/dc980a98-123b-4a83-a835-b151475813c8",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/225/iOS/439e55bd-de01-445e-a64d-6edcf39b3a3e"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/225/StandaloneWindows64/5c6ffea5-48ad-4234-af4d-b099f63c1567",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/225/StandaloneWindows64/433fbb89-a1c6-49fc-90fe-80c3665b0e21",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/225/StandaloneWindows64/3896378a-6a01-457e-ae6b-165ef81cb54f"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Feet",
+                "itemId": 241,
+                "recipe": "FEE_01_Sneakers_06",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/241/c75c30d5-9b46-449a-a9d9-8abcb22e10f9",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/241/Android/2267d7b4-2e55-4e1b-a301-e569ab88701d",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/241/Android/04b42217-86c7-4147-aca6-9f83ee0abb22",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/241/Android/0062a47e-8fb4-4b92-8936-2689e17d88ca"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/241/iOS/2d43731f-9cda-4545-81f0-f4040c3a7865",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/241/iOS/918d14ca-7fb2-46b4-9b4f-34bd8de9892b",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/241/iOS/d8326d92-7243-4781-ae6e-aef38d54eecc"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/241/StandaloneWindows64/89d42692-b5f1-4483-bac8-9088d10b3029",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/241/StandaloneWindows64/aef00784-a76a-4f08-a975-5ed5f626658c",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/241/StandaloneWindows64/d1e7caff-a0b3-4f6d-afb6-2d17ecccb4a2"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Legs",
+                "itemId": 209,
+                "recipe": "LEG_01_GymPants_07",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/209/5d44e4f6-670e-472d-8740-c747284dcbc5",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/209/Android/71208784-de63-4dfe-895e-4827024c20bf",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/209/Android/eac17090-09f4-4e53-b6b7-ecf2417c9e0f",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/209/Android/9ab962fa-d0ec-4bc4-8edd-cea0c9e8057f"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/209/iOS/3e3a8ab4-ebbd-4c85-8e99-0d6d0e391dd2",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/209/iOS/e76bdc9e-a263-4aff-83ef-e30b9f0bfe4f",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/209/iOS/3f21bd97-6419-414a-ba5a-882e38f255d7"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/209/StandaloneWindows64/007d4e55-01bb-45d8-a4bb-8f8b25a24b7e",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/209/StandaloneWindows64/918412cb-c72b-46b1-8d2e-390c28cf8d39",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/209/StandaloneWindows64/8902263c-6722-4f1a-9081-f510f4110388"
+                        ]
+                    }
+                ]
+            },
+            {
+                "slot": "Hair",
+                "itemId": 28,
+                "recipe": "HAI_60_GirlCurly_01",
+                "imageUri": "https://asset.maxverse.io/avatar-beta/assets/28/57a81133-5c79-4463-959e-2241b6d814fa",
+                "assetResourceInfo": [
+                    {
+                        "os": "Android",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/28/Android/748595b8-7921-4da8-b787-b0cdd43dcaef",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/28/Android/9fec1f07-23d4-4d4d-a6a0-931836204ed9",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/28/Android/95d23051-be70-43eb-924b-bd853754473a"
+                        ]
+                    },
+                    {
+                        "os": "iOS",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/28/iOS/2cfeb78e-5dab-4e20-9223-e68a35373e28",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/28/iOS/1c2a8168-f510-4916-ba9f-9778eebaeb8e",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/28/iOS/3a8057f0-dc7c-433e-a31b-d5f0ca3494b8"
+                        ]
+                    },
+                    {
+                        "os": "StandaloneWindows64",
+                        "catalogUri": "https://asset.maxverse.io/avatar-beta/assets/28/StandaloneWindows64/e3c9c631-017e-46b0-a62f-96acb77a5235",
+                        "hashUri": "https://asset.maxverse.io/avatar-beta/assets/28/StandaloneWindows64/6f5ccf7c-8b13-413a-88e3-3e9ca96042f5",
+                        "bundleUris": [
+                            "https://asset.maxverse.io/avatar-beta/assets/28/StandaloneWindows64/dc941f7e-fa05-41cb-97f6-4f835b2cceb4"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

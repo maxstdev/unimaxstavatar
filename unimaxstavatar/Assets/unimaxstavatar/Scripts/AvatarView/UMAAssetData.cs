@@ -1,6 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UMA;
+using UMA.CharacterSystem;
 using UnityEngine;
 
 namespace Maxst.Avatar
@@ -105,7 +105,7 @@ namespace Maxst.Avatar
 
             foreach (var slot in currentSlotList)
             {
-                if (slotName == slot.DisplayValue)
+                if (slotName == slot.name)
                 {
                     recipe = slot;
                 }

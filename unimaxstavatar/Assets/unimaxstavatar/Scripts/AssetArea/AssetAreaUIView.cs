@@ -9,7 +9,7 @@ namespace Maxst.Avatar
     {
         [SerializeField] private AssetUIItem assetitemPrefab;
         [SerializeField] private ScrollRect assetScrollview;
-        private List<AssetUIItem> assetItemList = new List<AssetUIItem>();
+        private Dictionary<string, AssetUIItem> assetItemDictionary = new();
 
         public Subject<string> slotname = new Subject<string>();
         public ReactiveProperty<ViewType> viewType = new ReactiveProperty<ViewType>();
@@ -21,44 +21,82 @@ namespace Maxst.Avatar
             item.SetData(thumbnail);
             item.OnclickButton = () =>
             {
-                itemSelectChange(item);
+                ItemSelectChange(item);
                 slotname.OnNext(slotName);
             };
             item.isSelect.Value = isSelected;
 
-            assetItemList.Add(item);
+            assetItemDictionary.Add(slotName, item);
         }
 
+        public AssetUIItem CreateAssetItem(string slotName, bool isSelected) {
+            AssetUIItem item = Instantiate(assetitemPrefab, assetScrollview.content);
+            
+            item.OnclickButton = () =>
+            {
+                ItemSelectChange(item);
+                slotname.OnNext(slotName);
+            };
+            item.isSelect.Value = isSelected;
+
+            assetItemDictionary.Add(slotName, item);
+            return item;
+        }
         public void CreateAssetItem(string slotName, string thumnailpath, bool isSelected)
         {
             AssetUIItem item = Instantiate(assetitemPrefab, assetScrollview.content);
             item.SetData(thumnailpath);
             item.OnclickButton = () =>
             {
-                itemSelectChange(item);
+                ItemSelectChange(item);
                 slotname.OnNext(slotName);
             };
             item.isSelect.Value = isSelected;
 
-            assetItemList.Add(item);
+            assetItemDictionary.Add(slotName, item);
         }
 
         public void DeleteAllItem()
         {
-            foreach (var asset in assetItemList)
+            foreach(var asset in assetItemDictionary.Values)
             {
                 Destroy(asset.gameObject);
             }
-            assetItemList.Clear();
+            assetItemDictionary.Clear();
         }
 
-        private void itemSelectChange(AssetUIItem item)
+        public void ItemSelectChange(string slotName)
         {
-            foreach (var asset in assetItemList)
+            assetItemDictionary.TryGetValue(slotName, out var item);
+            if (item != null)
+            {
+                ItemSelectChange(item);
+            }
+            else {
+                Debug.LogError("[AssetAreaUIView] ItemSelectChange : No item found.");
+            }
+        }
+
+        public void ItemSelectChange(AssetUIItem item = null)
+        {
+            InitSelect();
+
+            if (item != null)
+            {
+                item.isSelect.Value = true;
+            }
+        }
+
+        public void InitSelect() {
+            foreach (var asset in assetItemDictionary.Values)
             {
                 asset.isSelect.Value = false;
             }
-            item.isSelect.Value = true;
+        }
+
+        public AssetUIItem GetItem(string slotname)
+        {
+            return assetItemDictionary[slotname];
         }
     }
 }

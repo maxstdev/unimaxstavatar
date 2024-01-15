@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UniRx;
@@ -14,7 +12,7 @@ namespace Maxst.Avatar
         [SerializeField] private GameObject selectFaceIcon;
         [SerializeField] private GameObject selectBodyIcon;
 
-        public ReactiveProperty<ViewType> statecheck = new(ViewType.Face_Eyebrows);
+        public ReactiveProperty<ViewType> statecheck = new(ViewType.Face);
 
         private void Start()
         {
@@ -29,8 +27,8 @@ namespace Maxst.Avatar
                 {
                     switch (value)
                     {
-                        case ViewType.Face_Eyebrows:
-                        case ViewType.Face_Hair:
+                        case ViewType.Face:
+                        case ViewType.Hair:
                             faceButton.onClick.Invoke();
                             break;
                         case ViewType.Body:
@@ -45,7 +43,7 @@ namespace Maxst.Avatar
         {
             selectFaceIcon.SetActive(true);
             selectBodyIcon.SetActive(false);
-            statecheck.Value = ViewType.Face_Eyebrows;
+            statecheck.Value = ViewType.Face;
         }
 
         public void EnableBodyIcon()

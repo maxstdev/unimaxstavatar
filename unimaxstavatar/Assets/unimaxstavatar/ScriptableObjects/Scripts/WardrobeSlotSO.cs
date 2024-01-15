@@ -23,15 +23,18 @@ namespace Maxst.Avatar
         Waist,
         Legs,
         Feet,
-        Nose
+        Nose,
+        Set,
+        Undertop,
+        Underbottom
     }
 
     public enum WardrobeSlotKoreanName
     {
         None,
-        얼굴형,
+        얼굴,
         안경,
-        헤어스타일,
+        헤어,
         안색,
         눈썹,
         수염,
@@ -44,7 +47,10 @@ namespace Maxst.Avatar
         허리,
         하의,
         신발,
-        코
+        코,
+        세트,
+        상의내의,
+        하의내의
     }
 
     public enum AvatarPatial

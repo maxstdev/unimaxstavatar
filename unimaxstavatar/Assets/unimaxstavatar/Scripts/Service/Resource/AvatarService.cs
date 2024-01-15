@@ -50,6 +50,11 @@ namespace Maxst.Resource
             return httpImpl;
         }
 
+        public IObservable<List<AvatarResource>> FetchAllAvatarResources([Retrofit.Parameters.Header("Authorization")] string accessToken, [Query("mainCategory")] string mainCategory, [Query("os")] string os, [Query("appId")] string appId)
+        {
+            return SendRequest<List<AvatarResource>>(MethodBase.GetCurrentMethod(), accessToken, mainCategory, os, appId) as IObservable<List<AvatarResource>>;
+        }
+
         public IObservable<List<AvatarResource>> FetchAvatarResources([Retrofit.Parameters.Header("Authorization")] string accessToken, [Query("mainCategory")] string mainCategory, [Query("subCategory")] string subCategory, [Query("os")] string os, [Query("appId")] string appId)
         {
              return SendRequest<List<AvatarResource>>(MethodBase.GetCurrentMethod(), accessToken, mainCategory, subCategory, os, appId) as IObservable<List<AvatarResource>>;
