@@ -86,6 +86,7 @@ namespace Maxst.Passport
             TokenRepo.Instance.ClientID = openidArguments.TryGetValue(OpenIDConnectArgument.ClientID, out var clientID) ? clientID : string.Empty;
             TokenRepo.Instance.ClientSecret = openidArguments.TryGetValue(OpenIDConnectArgument.ClientSecret, out var ClientSecret) ? ClientSecret : string.Empty;
             TokenRepo.Instance.ClientType = clientType;
+            TokenRepo.Instance.passportConfig = passportConfig;
             
             SetWindowLoginServiceManger(this);
         }
@@ -266,9 +267,6 @@ namespace Maxst.Passport
             string Query = url.Split("?"[0])[1];
 
             var AuthorizationDictionary = Query.Replace("?", "").Split('&').ToDictionary(x => x.Split('=')[0], x => x.Split('=')[1]);
-
-            var state = AuthorizationDictionary["state"];
-            var session_state = AuthorizationDictionary["session_state"];
             var code = AuthorizationDictionary["code"];
 
             foreach (var each in AuthorizationDictionary)

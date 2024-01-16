@@ -2,6 +2,7 @@ using Maxst.Settings;
 using Maxst.Token;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 using static Maxst.Token.JwtTokenParser;
@@ -31,7 +32,7 @@ namespace Maxst.Passport
         private const long DEFAULT_EFFECTIVE_TIME = 300;
         private const long ESTIMATED_EXPIRATION_TIME = 30;
 
-        private const string ClientTokenKey = "Passport_ClientToken";
+        private const string ClientAccessTokenKey = "Passport_ClientAccessToken";
 
         private const string IdTokenKey = "Passport_IdToken";
         private const string AccessTokenKey = "Passport_AccessToken";
@@ -59,7 +60,7 @@ namespace Maxst.Passport
         public string ClientID { get; set; } = string.Empty;
         public string ClientSecret { get; set; } = string.Empty;
         public ClientType ClientType { get; set; } = ClientType.Public;
-
+        public PassportConfig passportConfig { get; set; }
 
         [RuntimeInitializeOnLoadMethod]
         public static void TokenRepoOnLoad()
@@ -75,6 +76,22 @@ namespace Maxst.Passport
         public ClientToken GetClientToken()
         {
             return clientToken;
+        }
+
+        public IEnumerator GetClientTokenCoroutine(Action<ClientToken> action) {
+            if (ClientIsTokenExpired())
+            {
+                var applicationId = passportConfig.ApplicationId;
+                var applicationKey = passportConfig.ApplicationKey;
+                var grantType = passportConfig.GrantType;
+                yield return FetchPassportClientToken(applicationId, applicationKey, grantType,
+                    (exception, code) => {
+                        Debug.Log($"[TokenRepo] GetClientTokenCoroutine exception : {exception}");
+                        Debug.Log($"[TokenRepo] GetClientTokenCoroutine code : {code}");
+                    }
+                );
+            }
+            action?.Invoke(clientToken);
         }
 
         public TokenDictionary GetClinetTokenDictionary()
@@ -145,9 +162,8 @@ namespace Maxst.Passport
             string applicationId, string applicationKey, string grantType,
             Action<TokenStatus, ClientToken> callback = null,
             Action<ErrorCode, Exception> LoginFailAction = null,
-            bool isForcedRefresh = true)
+            bool isForcedRefresh = false)
         {
-
             if (isForcedRefresh || (clientToken == null || ClientIsTokenExpired()))
             {
                 yield return new WaitUntil(() => IsClientTokenNotRenewing());
@@ -264,8 +280,14 @@ namespace Maxst.Passport
         {
             while (true)
             {
-                if (IsTokenExpired() && !IsRefreshTokenExpired())
+                if (IsTokenExpired())
                 {
+                    if (IsRefreshTokenExpired())
+                    {
+                        Debug.LogWarning(" Refresh token has expired. Please log in again.");
+                        yield break;
+                    }
+
                     yield return FetchPassportRefreshToken(ClientID, GrantType, RefreshToken
                         , e =>
                         {
@@ -276,14 +298,9 @@ namespace Maxst.Passport
                         yield return new WaitForSeconds(5);
                     }
                 }
-                else
-                {
-                    Debug.LogWarning(" Refresh token has expired. Please log in again.");
-                    yield break;
 
-                    var time = MeasureRemainTimeSeconds();
-                    yield return new WaitForSeconds(System.Math.Max(time / 2, 5));
-                }
+                var time = MeasureRemainTimeSeconds();
+                yield return new WaitForSeconds(System.Math.Max(time / 2, 5));
             }
         }
 
@@ -445,7 +462,6 @@ namespace Maxst.Passport
 
             yield return new WaitUntil(() => IsClientTokenNotRenewing());
 
-
             disposable.Dispose();
         }
 
@@ -545,7 +561,7 @@ namespace Maxst.Passport
 
         private void StoreClientToken(ClientToken token = null)
         {
-            PlayerPrefs.SetString(ClientTokenKey, token?.access_token ?? "");
+            PlayerPrefs.SetString(ClientAccessTokenKey, token?.access_token ?? "");
         }
 
         private void RestoreToken()
@@ -568,6 +584,19 @@ namespace Maxst.Passport
                     accessToken = accessToken,
                     refreshToken = refreshToken,
                     refreshExpiresIn = refreshExpiresIn
+                });
+            }
+
+            var clientAccessToken = PlayerPrefs.GetString(ClientAccessTokenKey, "");
+            if (string.IsNullOrEmpty(clientAccessToken))
+            {
+                ClientTokenConfig(null);
+            }
+            else
+            {
+                ClientTokenConfig(new ClientToken
+                {
+                    access_token = clientAccessToken,
                 });
             }
         }

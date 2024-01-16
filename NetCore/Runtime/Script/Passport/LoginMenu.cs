@@ -45,7 +45,16 @@ namespace Maxst.Passport
         private void GetClientToken()
         {
             var passportConfig = SampleConfig.Instance;
-            OpenIdConnectAdapter.OnClientToken(passportConfig);
+            OpenIdConnectAdapter.OnClientToken(passportConfig,
+                (status, token) => {
+                    Debug.Log($"[LoginMenu] OnClientToken status : {status}");
+                    Debug.Log($"[LoginMenu] OnClientToken token.access_token : {token.access_token}");
+                },
+                (code, exception) => {
+                    Debug.Log($"[LoginMenu] OnClientToken code : {code}");
+                    Debug.Log($"[LoginMenu] OnClientToken exception : {exception}");
+                }
+            );
         }
 
         void IOpenIDConnectListener.OnSuccess(Token Token, RequestType Type)
