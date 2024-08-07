@@ -30,6 +30,10 @@ namespace Maxst.Avatar
         public LiveEvent completeButtonClick = new LiveEvent();
         public LiveEvent saveButtonClick = new LiveEvent();
         public LiveEvent loadButtonClick = new LiveEvent();
+        public LiveEvent CaptureExecute = new LiveEvent();
+
+        public LiveEvent NativeClose = new LiveEvent();
+        public LiveEvent NativeStart = new LiveEvent();
 
         public List<string> raceDataWardrobeSlotList { get; }
 

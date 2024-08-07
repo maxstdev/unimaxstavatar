@@ -133,6 +133,7 @@ namespace Maxst.Avatar
             avatarResourceRepo.loadUserAvatarResourceDoneEvent.AddObserver(this, LoadUserAvatarResourceDone);
 
             avatarResourceRepo.resourceDownloadStatusEvent.AddObserver(this, ResourceDownloadStatus);
+			avatarCustomViewModel.NativeStart.AddObserver(this, () => { });
         }
 
         private void ResourceDownloadStatus(AvatarResource resource, DownloadStatus status)
@@ -165,6 +166,7 @@ namespace Maxst.Avatar
             avatarResourceRepo.loadUserAvatarResourceDoneEvent.RemoveAllObserver(this);
 
             avatarResourceRepo.resourceDownloadStatusEvent.RemoveAllObserver(this);
+            avatarCustomViewModel.NativeStart.RemoveAllObserver(this);
         }
 
         private void UndoAvatar()
@@ -182,6 +184,7 @@ namespace Maxst.Avatar
         private void RefreshAvatar()
         {
             avatarResourceRepo.AvatarHistoryClear();
+            AvatarDressUp(Avatar, avatarResourceRepo.loadUserAvatarRecipeEvent.Value);
             SetAvatarUI(Avatar);
         }
 
@@ -575,7 +578,7 @@ namespace Maxst.Avatar
             }
             else
             {
-                Debug.Log("End Scene!!");
+                avatarCustomViewModel.NativeClose.Post();
             }
         }
 
@@ -590,6 +593,7 @@ namespace Maxst.Avatar
             //SaveRecipeExtensions();
             var saveRecipe = avatarResourceRepo.GetSaveRecipeExtensions(Avatar);
             var result = PostSaveRecipeExtensions(saveRecipe);
+            avatarCustomViewModel.CaptureExecute.Post();
             Debug.Log($"[MaxstAvatarCustom] Next Scene!! : {result}");
         }
 
