@@ -7,6 +7,7 @@ namespace Maxst.Avatar
         Hair,
         Body,
         Animation,
-        Result
+        Result,
+        Init
     }
 }

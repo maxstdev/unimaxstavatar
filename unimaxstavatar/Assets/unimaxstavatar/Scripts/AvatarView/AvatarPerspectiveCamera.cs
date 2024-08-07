@@ -114,6 +114,7 @@ namespace Maxst.Avatar
                     DOPath(avatarCameraAnimationSO.AnimationPosition, avatarCameraAnimationSO.AnimationWaypoint);
                     break;
                 case ViewType.Result:
+                case ViewType.Init:
                     DOPath(avatarCameraAnimationSO.ResultPosition, avatarCameraAnimationSO.ResultWaypoint);
                     break;
                 default: break;
